@@ -19,8 +19,5 @@ read_file(Stream, [X | Xs]) :-
 
 jsonparse().
 
-picchia("Davi", "saraH").
-piange("sarah").
 
-parla("Sarah"):-
-    pichia("Davi", "Sarah").
+object('{', L, '}').
