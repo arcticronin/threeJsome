@@ -1,3 +1,8 @@
+
+tryread(Filename, String) :-
+    read_file_to_string(FileName, JSON_obj, []).
+
+
 readit(Name) :-
     open(Name, read, Str),
     read_file(Str, Lines),
@@ -17,7 +22,22 @@ read_file(Stream, [X | Xs]) :-
     read(Stream, X),
     read_file(Stream, Xs).
 
-jsonparse().
 
+skip([' ' | Xs], []).
+
+
+Jsonparse().
 
 object('{', L, '}').
+
+array('[', L, ']').
+
+object('{', L, '}').
+
+object('{', L, '}').
+
+
+json_parse(JSON, Object) :-
+    atom(JSON),
+    %% !,
+    skip(Rest, []).
