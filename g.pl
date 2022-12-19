@@ -1,4 +1,8 @@
+%% roba per debug
 %%
+%%
+prova(X):-
+    read_file_to_string("in.txt", X, []).
 %%
 %%
 
@@ -15,10 +19,11 @@
 
 
 
-%% normalize forse non serve ma è stato una cazzata farlo
-%% prove, codice non ancora funzionante
+%% normalize forse non serve
+%% perchè ci sono spazi all'interno delle stringhe
+%% ma è stato una cazzata farlo
 string_manipulation(Input,Output):-
-	normalize_space(atom(S0), Input),
+	%normalize_space(atom(S0), Input),
 	replace_in_string(":"," : ",S0,S1),
 	replace_in_string(","," , ",S1,S2),
 	replace_in_string("{"," { ",S4,S5),
@@ -87,6 +92,16 @@ clean_token_list([Token|Tokens_From_Stream], [Token|Token_List]) :-
 %% id()
 %% value()
 %%
+% value can be:
+% string()
+% number
+% obj
+% array
+% true
+% false
+% null
+% tutti saranno messi come tokens o come costrutti di secondo livello
+
 %%
 % definizioone della grammar
 object(Body) -->
@@ -105,13 +120,3 @@ pair(Body) -->
     object().
 
 
-
-% value can be:
-% string()
-% number
-% obj
-% array
-% true
-% false
-% null
-% tutti saranno messi come tokens
