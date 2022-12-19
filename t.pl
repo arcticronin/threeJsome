@@ -41,3 +41,42 @@ json_parse(JSON, Object) :-
     atom(JSON),
     %% !,
     skip(Rest, []).
+
+
+process_file :-
+   read(Line),
+   Line \== end_of_file, % when Line is not not end of file, call process.
+   process(Line).
+process_file :- !. % use cut to stop backtracking
+
+process2(Line):- %this will print the line into the console
+   write(Line),nl,
+   process_file.
+
+process(Line):- %this will print the line into the console
+   tokenize_atom(Line, X),nl,
+   process_file.
+
+start:-
+    see('input.txt'),
+    process_file,
+    seen.
+
+
+
+comma
+colon
+bracket("}")
+brcket("{")
+brcket("[")
+brcket("]")
+id("arthur")
+value("dent")
+
+elem (L|Ls):-
+    id:
+    bracket("{"),
+    elem(Ls)
+    bracket("}").
+
+elem(L|Ls)
