@@ -6,17 +6,29 @@ prova(X):-
 %%
 %%
 
+["OPEN_BRACKET", string("ciao"), "COLON", "OPEN_BRACKET", '12', "COMMA", '32', "CLOSED_BRACKET"]
 
+--> pair(id, "COLON", value)
+    pair(pair|pair)
+    pair() :- []
+
+jsonobj(pair("ciao", array(12,32)))
+
+
+jsonobj("OPEN_curlybrace | adlkjjhasdkljas)":-
+          roba dentro
+jsonobj(Rova):-
+          jsonarray(roba)
 
 %% primo livello : tokens
 %% OPEN_BRACKET
 %% CLOSED_BRACKET
 %% OPEN_CURLYBRACE
 %% CLOSED_CURLYBRACE
-%%
-%%
-%%
-
+%% COLON
+%% COMMA
+%% string("roba")
+%% number
 
 
 %% normalize forse non serve
@@ -91,7 +103,10 @@ clean_token_list([Token|Tokens_From_Stream], [Token|Token_List]) :-
 %% array()
 %% id()
 %% value()
-%%
+
+
+
+
 % value can be:
 % string()
 % number
@@ -119,4 +134,5 @@ pair(Body) -->
     [COLON],
     object().
 
-
+pippo([A , ";", B]) :-
+  ciao(A , B).
