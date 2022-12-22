@@ -1,24 +1,27 @@
 %% roba per debug
 %%
 %%
-prova(X):-
+prova2(X):-
     read_file_to_string("in.txt", X, []).
 %%
 %%
-
-["OPEN_BRACKET", string("ciao"), "COLON", "OPEN_BRACKET", '12', "COMMA", '32', "CLOSED_BRACKET"]
-
---> pair(id, "COLON", value)
-    pair(pair|pair)
-    pair() :- []
-
-jsonobj(pair("ciao", array(12,32)))
+prova(X):-
+  read_file_to_codes("in.txt", X, []).
 
 
-jsonobj("OPEN_curlybrace | adlkjjhasdkljas)":-
-          roba dentro
-jsonobj(Rova):-
-          jsonarray(roba)
+%%["OPEN_BRACKET", string("ciao"), "COLON", "OPEN_BRACKET", '12', "COMMA", '32', "CLOSED_BRACKET"]
+
+%%--> pair(id, "COLON", value)
+%%    pair(pair|pair)
+%%    pair() :- []
+
+%jsonobj(pair("ciao", array(12,32)))
+
+
+%jsonobj("OPEN_curlybrace | adlkjjhasdkljas)":-
+  %        roba dentro
+%jsonobj(Rova):-
+ %         jsonarray(roba)
 
 %% primo livello : tokens
 %% OPEN_BRACKET
@@ -69,6 +72,7 @@ read_tokens_from_stream(Stream, [Token|Tokens_From_Stream]) :-
   get_next_token(Stream, Token),
   !,
   read_tokens_from_stream(Stream, Tokens_From_Stream).
+
 read_tokens_from_stream(_, []).
 
 get_next_token(Stream, Token) :-
