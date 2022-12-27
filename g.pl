@@ -1,5 +1,6 @@
+%%% -*- Mode: prolog -*-
+
 %% roba per debug
-%%
 %%
 prova2(X):-
     read_file_to_string("in.txt", X, []).
