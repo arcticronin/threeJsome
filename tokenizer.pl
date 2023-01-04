@@ -104,6 +104,13 @@ codes_tokens([C|Cs], [string(T)|Ts]):-
 
     codes_tokens(Rest, Ts).
 
+
+% numbers
+codes_tokens(C, [number(T)|Ts]):-
+    codes_number_(C, T, Rest),
+    %parse_number(C, T, Rest),
+    codes_tokens(Rest, Ts).
+
 %% tutti i codici no nriconosciuti vengono catalogati come debug(codice)
 % not coded (DEBUG)
 codes_tokens([C|Cs],[T|Ts]):-
@@ -131,3 +138,24 @@ codes_stringtoken_([C|Cs], [C|Ss], Rest):-
     C \= 34,
     codes_stringtoken_(Cs, Ss, Rest).
 
+%codes_number_/3
+%codes_number_(C, N, Rest):-
+%    number_codes(N, Processed),
+%    append(Processed, Rest, C).
+%
+codes_number_(AsciiCodes, Number, Rest) :-
+  codes_number_(AsciiCodes, 0, Number, Rest).
+
+codes_number_([], Acc, Acc, []).
+codes_number_([AsciiCode|AsciiCodes], Acc, Number, Rest) :-
+  % Check if the ASCII code is a digit
+  between(48, 57, AsciiCode),
+
+  % Convert the ASCII code to a digit and add it to the accumulator
+  Digit is AsciiCode - 48,
+  NewAcc is Acc * 10 + Digit,
+
+  % Recurse to parse the rest of the list
+  codes_number_(AsciiCodes, NewAcc, Number, Rest).
+
+codes_number_(Rest, Number, Number, Rest).
