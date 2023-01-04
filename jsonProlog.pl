@@ -1,4 +1,4 @@
-%%% mode Prolog %%%
+%%% -*- Mode: prolog -*-
 %%%
 %%% progetto JSON - 2022/2023
 

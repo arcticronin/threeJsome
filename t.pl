@@ -1,4 +1,4 @@
-
+%%% -*- Mode: prolog -*-
 tryread(Filename, String) :-
     read_file_to_string(FileName, JSON_obj, []).
 
