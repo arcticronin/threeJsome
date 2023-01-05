@@ -1,3 +1,5 @@
+%per if_/3
+%   :- use_module(library(reif)).
 
 tokenize(T):-
   read_file_to_codes("in.txt", X, []),
@@ -8,7 +10,8 @@ tokenize(T):-
 %string_tokens/2
 string_tokens(S,T):-
     atom_codes(S,C),
-    codes_tokens(C,T).
+    codes_tokens(C,T2),
+    collapse_whitespaces(T2,T).
 
 
 %codes_tokens/2
@@ -20,6 +23,7 @@ codes_tokens([], []).
 codes_tokens([C|Cs], [T|Ts]):-
     C = 123,
     T = "OPENCURLY",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
@@ -168,3 +172,26 @@ codes_number_([AsciiCode|AsciiCodes], Acc, Number, Rest) :-
   codes_number_(AsciiCodes, NewAcc, Number, Rest).
 
 codes_number_(Rest, Number, Number, Rest).
+
+
+%collapse_whitespaces/2
+
+collapse_whitespaces([] , []).
+
+collapse_whitespaces([A|Ls] , [A|Rs]):-
+    A \= "WHITESPACE",
+    collapse_whitespaces(Ls, Rs).
+
+%removing trailing whitespace
+collapse_whitespaces(["WHITESPACE"|Ls],[]):-
+    Ls = [].
+
+collapse_whitespaces([W,X|Ls], [W|Rs]):-
+    W = "WHITESPACE",
+    W \= X,
+    collapse_whitespaces([X|Ls], Rs).
+
+collapse_whitespaces([W,W2|Ls], R):-
+    W = "WHITESPACE",
+    W2 = W,
+    collapse_whitespaces([W2|Ls], R).
