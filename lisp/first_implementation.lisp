@@ -1,7 +1,6 @@
 (defparameter curly-brackets '(#\{ #\}))
 (defparameter squared-brackets '(#\[ #\]))
 
-(defparameter test-json-string "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\"}")
 
 ;;;; Given a string returns an array of characters
 (defun string-to-list (json-string)
@@ -13,7 +12,7 @@
                         (not (member char strings-to-filter))) 
     string-list))
 
-;;;; Input : Json string as list - Checks the number of { == }
+;;;; Given json string list, removes every element except 
 (defun brackets-checker (string-list) 
     (and 
     (evenp (list-length (filter-string-list string-list curly-brackets)))
