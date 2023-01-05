@@ -1,5 +1,6 @@
-%per if_/3
-%   :- use_module(library(reif)).
+%per if_/3 e reification pr
+:- use_module(library(reif)).
+:- use_module(library(prolog_pack)). %for managing packs using pack_install/1
 
 tokenize(T):-
   read_file_to_codes("in.txt", X, []),
@@ -29,36 +30,43 @@ codes_tokens([C|Cs], [T|Ts]):-
 codes_tokens([C|Cs], [T|Ts]):-
     C = 125,
     T = "CLOSEDCURLY",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 91,
     T = "OPENBRACKET",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 93,
     T = "CLOSEDBRACKET",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 44,
     T = "COMMA",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 58,
     T = "COLON",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 43,
     T = sign("PLUS"),
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 45,
     T = sign("MINUS"),
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([T,R,U,E|Cs], [Tok| Ts]):-
@@ -67,6 +75,7 @@ codes_tokens([T,R,U,E|Cs], [Tok| Ts]):-
     U = 117,
     E = 101,
     Tok = "true",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([F,A,L,S,E|Cs], [T| Ts]):-
@@ -76,6 +85,7 @@ codes_tokens([F,A,L,S,E|Cs], [T| Ts]):-
     S = 115,
     E = 101,
     T = "false",
+    !,
     codes_tokens(Cs, Ts).
 
 codes_tokens([N,U,L,L|Cs], [T| Ts]):-
@@ -83,6 +93,7 @@ codes_tokens([N,U,L,L|Cs], [T| Ts]):-
     U = 117,
     L = 108,
     T = "null",
+    !,
     codes_tokens(Cs, Ts).
 
 %% whitespaces
@@ -91,18 +102,21 @@ codes_tokens([N,U,L,L|Cs], [T| Ts]):-
 codes_tokens([C|Cs], [T|Ts]):-
     C = 9,
     T = "WHITESPACE",
+    !,
     codes_tokens(Cs, Ts).
 
 % newline
 codes_tokens([C|Cs], [T|Ts]):-
     C = 10,
     T = "WHITESPACE",
+    !,
     codes_tokens(Cs, Ts).
 
 % space
 codes_tokens([C|Cs], [T|Ts]):-
     C = 32,
     T = "WHITESPACE",
+    !,
     codes_tokens(Cs, Ts).
 
 % compound terms
@@ -112,6 +126,7 @@ codes_tokens([C|Cs], [T|Ts]):-
 %34 code of "
 codes_tokens([C|Cs], [string(T)|Ts]):-
     C = 34,
+    !,
     codes_stringtoken_(Cs, S, Rest),
     atom_codes(T , S),
 
