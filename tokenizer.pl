@@ -3,8 +3,17 @@ tokenize(T):-
   read_file_to_codes("in.txt", X, []),
   codes_tokens(X,T).
 
+%quick debug reason
+%remember to escape the "s
+%string_tokens/2
+string_tokens(S,T):-
+    atom_codes(S,C),
+    codes_tokens(C,T).
+
+
 %codes_tokens/2
 %funzione base per trasformare da codice a token
+% non reversibile per instantiation error su atom codes
 
 codes_tokens([], []).
 
