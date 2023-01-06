@@ -110,7 +110,8 @@ codes_tokens([C|Cs], [T|Ts]):-
 % strings
 
 % 39 code of '
-%34 code of "
+% 34 code of "
+% i could use a predicate to not hardcode it, but it's fine for now
 codes_tokens([C|Cs], [string(T)|Ts]):-
     C = 34,
     !,
@@ -137,17 +138,14 @@ codes_tokens([C|Cs],[T|Ts]):-
     codes_tokens(Cs, Ts).
 
 
-%is_whitespace/1
-is_whitespace(9). %tab
-is_whitespace(10). %nl
-is_whitespace(32). %space
-
 %is_string_delimiter/1
 is_string_delimiter(34).
 
 %codes_stringtokens/3
-%% when i find \" che è la apertura di una stringa, append nothing and continue to tokenize the rest
-% second param is the accumulator, third is the actual token unified
+%% when i find \" che è la apertura di una stringa,
+%% append nothing and continue to tokenize the rest
+%% second param is the accumulator,
+%% third is the actual token unified
 
 %% maybe not needed
 codes_stringtoken_([], _, _):-
@@ -161,6 +159,13 @@ codes_stringtoken_([A|Cs], [], Cs):-
 codes_stringtoken_([C|Cs], [C|Ss], Rest):-
     not(is_string_delimiter(C)),
     codes_stringtoken_(Cs, Ss, Rest).
+
+%% whitespace defining predicates
+%is_whitespace/1
+is_whitespace(9). %tab
+is_whitespace(10). %nl
+is_whitespace(32). %space
+
 
 %codes_number_/3
 %codes_number_(C, N, Rest):-
@@ -223,13 +228,65 @@ remove_whitespaces([L|Ls],[L|Rs]):-
     !,
     remove_whitespaces(Ls, Rs).
 
+%tokens_jsonobj/2
+tokens_jsonobj([C|Cs], jsonobj(S)):-
+    C = "OPENCURLY",
+    !,
+    tokens_members_rest(Cs, S, Rest),
+    Rest = []. %% TODO: must be true at hte first callbut maybe
+                %% can be omitted, it's checked there
 
-%tokens_obj/2
+
+%tokens_jsonobj/2
+tokens_jsonobj([C|Cs], jsonarr(S)):-
+    C = "OPENBRACKET",
+    !,
+    tokens_elements_rest(Cs, S, Rest),
+    Rest = []. %% TODO: must be true at hte first callbut maybe
+                %% can be omitted, it's checked there
+
+
+%tokens_members_rest/3
 %
-tokens_obj_rest(T, [], T, []). %% if last arg isnt empty, it must be false
-%% try ths but fuck off it's useless
-tokens_obj_rest(T, [], T, [_|_]):-
-    false.
-%% if last arg isnt empty, it must be false
+%found endmark append nothing to my memebers, rest is everything
+%after the endmark
+tokens_members_rest(["CLOSEDCURLY"|Rest], [] , Rest).
+%% maybe not needed, finished to read didnt find endmark
+
+tokens_members_rest([], _, _):-
+    fail.
+
+%% recursive case if input list not empty
+tokens_members_rest([C|Cs], [P|Ps], Rest):-
+    C \= "CLOSEDCURLY", %opt
+    tokens_pair_rest([C|Cs], P, R1),
+    tokens_members_rest(R1, Ps ,Rest).
+
+%tokens_pair_rest/3
+tokens_pair_rest([string(A),"COLON"|Cs], (A , Val), Rest):-
+    tokens_value_rest(Cs, Val, Rest).
 
 
+%tokens_value_res/3
+tokens_value_rest([string(Val)|Rest], Val, Rest):-
+    !.
+tokens_value_rest([num(Val)|Rest], Val, Rest):-
+    !.
+tokens_value_rest(["OPENBRACKET"|Cs], jsonobj(Members), Rest):-
+    !,
+    tokens_members_rest(Cs, Members, Rest).
+
+%tokens_elements_rest/3,
+tokens_elements_rest(["CLOSEDBRACKET"|Rest], [], Rest):-
+    !.
+
+tokens_elements_rest(C, [V1|V2], Rest):-
+    !,
+    tokens_value_rest(C, V1, R1),
+    tokens_elements_rest(R1, V2, Rest).
+
+
+%string_obj/2
+string_obj(S, O):-
+    string_tokens(S, T),
+    tokens_jsonobj(T, O).
