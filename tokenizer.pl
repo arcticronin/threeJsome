@@ -12,14 +12,16 @@ tokenize(T):-
 string_tokens(S,T):-
     atom_codes(S,C),
     codes_tokens(C,T2),
-    collapse_whitespaces(T2,T).
+    remove_whitespaces(T2,T).
+    %collapse_whitespaces(T2,T).
 
 
 %codes_tokens/2
 %funzione base per trasformare da codice a token
 % non reversibile per instantiation error su atom codes
 
-codes_tokens([], []).
+codes_tokens([], []):-
+    !.
 
 codes_tokens([C|Cs], [T|Ts]):-
     C = 123,
@@ -98,23 +100,8 @@ codes_tokens([N,U,L,L|Cs], [T| Ts]):-
 
 %% whitespaces
 
-% tab
 codes_tokens([C|Cs], [T|Ts]):-
-    C = 9,
-    T = "WHITESPACE",
-    !,
-    codes_tokens(Cs, Ts).
-
-% newline
-codes_tokens([C|Cs], [T|Ts]):-
-    C = 10,
-    T = "WHITESPACE",
-    !,
-    codes_tokens(Cs, Ts).
-
-% space
-codes_tokens([C|Cs], [T|Ts]):-
-    C = 32,
+    is_whitespace(C),
     T = "WHITESPACE",
     !,
     codes_tokens(Cs, Ts).
@@ -133,22 +120,30 @@ codes_tokens([C|Cs], [string(T)|Ts]):-
     codes_tokens(Rest, Ts).
 
 
-% numbers
+% try to parse a number if no one of the others applies
+% todo: better number parsing: group any of "+-123,e"
+% till a WHITESPACE (or another term, see grammar) and then call atom_number or smth
 codes_tokens(C, [number(T)|Ts]):-
+    !,
     codes_number_(C, T, Rest),
     %parse_number(C, T, Rest),
     codes_tokens(Rest, Ts).
 
-%% tutti i codici no nriconosciuti vengono catalogati come debug(codice)
+%% tutti i codici non riconosciuti vengono catalogati come debug(codice)
 % not coded (DEBUG)
 codes_tokens([C|Cs],[T|Ts]):-
+    !,
     T = todo(C),
     codes_tokens(Cs, Ts).
 
 
+%is_whitespace/1
+is_whitespace(9). %tab
+is_whitespace(10). %nl
+is_whitespace(32). %space
 
-
-
+%is_string_delimiter/1
+is_string_delimiter(34).
 
 %codes_stringtokens/3
 %% when i find \" che è la apertura di una stringa, append nothing and continue to tokenize the rest
@@ -159,11 +154,12 @@ codes_stringtoken_([], _, _):-
     fail.
 
 %% found my end mark
-codes_stringtoken_([34|Cs], [], Cs).
+codes_stringtoken_([A|Cs], [], Cs):-
+    is_string_delimiter(A).
 
 %% recursive case if input list not empty
 codes_stringtoken_([C|Cs], [C|Ss], Rest):-
-    C \= 34,
+    not(is_string_delimiter(C)),
     codes_stringtoken_(Cs, Ss, Rest).
 
 %codes_number_/3
@@ -172,21 +168,23 @@ codes_stringtoken_([C|Cs], [C|Ss], Rest):-
 %    append(Processed, Rest, C).
 %
 codes_number_(AsciiCodes, Number, Rest) :-
-  codes_number_(AsciiCodes, 0, Number, Rest).
+    !,
+    codes_number_(AsciiCodes, 0, Number, Rest).
 
-codes_number_([], Acc, Acc, []).
+codes_number_([], Acc, Acc, []):-
+    !.
 codes_number_([AsciiCode|AsciiCodes], Acc, Number, Rest) :-
   % Check if the ASCII code is a digit
   between(48, 57, AsciiCode),
-
+  !,
   % Convert the ASCII code to a digit and add it to the accumulator
   Digit is AsciiCode - 48,
   NewAcc is Acc * 10 + Digit,
-
   % Recurse to parse the rest of the list
   codes_number_(AsciiCodes, NewAcc, Number, Rest).
 
-codes_number_(Rest, Number, Number, Rest).
+codes_number_(Rest, Number, Number, Rest):-
+    !.
 
 
 %collapse_whitespaces/2
@@ -210,3 +208,28 @@ collapse_whitespaces([W,W2|Ls], R):-
     W = "WHITESPACE",
     W2 = W,
     collapse_whitespaces([W2|Ls], R).
+
+%remove_whitespaces/2
+
+remove_whitespaces([],[]):-
+    !.
+
+remove_whitespaces([L|Ls], Rs):-
+    L = "WHITESPACE",
+    !,
+    remove_whitespaces(Ls, Rs).
+
+remove_whitespaces([L|Ls],[L|Rs]):-
+    !,
+    remove_whitespaces(Ls, Rs).
+
+
+%tokens_obj/2
+%
+tokens_obj_rest(T, [], T, []). %% if last arg isnt empty, it must be false
+%% try ths but fuck off it's useless
+tokens_obj_rest(T, [], T, [_|_]):-
+    false.
+%% if last arg isnt empty, it must be false
+
+
