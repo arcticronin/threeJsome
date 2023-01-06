@@ -6,6 +6,13 @@ tokenize(T):-
   read_file_to_codes("in.txt", X, []),
   codes_tokens(X,T).
 
+t(O):-
+  read_file_to_codes("in.txt", X, []),
+  codes_tokens(X, T1),
+  remove_whitespaces(T1,T),
+  write(T),
+  tokens_jsonobj(T, O).
+
 %quick debug reason
 %remember to escape the "s
 %string_tokens/2
@@ -282,8 +289,15 @@ tokens_elements_rest(["CLOSEDBRACKET"|Rest], [], Rest):-
 
 tokens_elements_rest(C, [V1|V2], Rest):-
     !,
-    tokens_value_rest(C, V1, R1),
+    tokens_value_rest(C, V1, ["COMMA"|R1]),
     tokens_elements_rest(R1, V2, Rest).
+
+
+tokens_elements_rest(C, V, Rest):-
+    !,
+    tokens_value_rest(C, V, Rest).
+    % nocomma so it's just V1
+    %tokens_elements_rest(R1, V2, Rest).
 
 
 %string_obj/2
