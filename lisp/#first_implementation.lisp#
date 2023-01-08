@@ -2,7 +2,7 @@
 (defparameter squared-brackets '(#\[ #\]))
 (defparameter spaces '(#\Space #\Newline #\Tab))
 (defparameter apix '(#\" #\'))
-;;; NOTE ! #\{carattere_a_piacere} <- è la notazione per i caratteri in lisp
+;;; NOTE ! #\{carattere_a_piacere} <- Ã¨ la notazione per i caratteri in lisp
 
 
 ;;;; Given a string returns an array of characters
@@ -42,7 +42,7 @@
 
 
 
-;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
+;;;(#\{ #\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" #\})
 
 ;; Lo chiamo quando incontro il carattere \"
 ;;; Caso base : \" <- Se ritrovo i doppi apici so che sono alla fine di una stringa
@@ -57,5 +57,4 @@
      )
 ))
 
-(defun tokenize (json-char-list tokenized-list) 
-  (if (null json-char-list) (list nil) ))
+
