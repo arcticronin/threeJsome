@@ -14,32 +14,39 @@
 (defun char-list-to-string (char-list) 
   (coerce char-list 'string))
 
+(defun remove-white-spaces (char-list) 
+  (remove-if
+   (lambda (char)
+     (member char spaces))
+   char-list))
 
-(defun remove-white-spaces (char-list &optional is-in-string) 
-  (if (null char-list) char-list
-    (let ((list-head (first char-list))
-          (list-body (rest char-list)))
-      (if (null is-in-string)
-          (cond ((eql list-head #\")
-                 (append (list list-head) 
-                         (remove-white-spaces list-body T)))
-                ((member list-head spaces) 
-                 (remove-white-spaces list-body nil))
-                (T (append (list list-head) 
-                           (remove-white-spaces
-                            list-body nil)))
-                )
-       (if (eql list-head #\") 
-           (append (list list-head) 
-                   (remove-white-spaces 
-                    list-body 
-                    nil)) 
-         (append (list list-head) 
-                 (remove-white-spaces 
-                  list-body 
-                  T)))
-       ))))
+; (defun remove-white-spaces (char-list &optional is-in-string) 
+;   (if (null char-list) char-list
+;     (let ((list-head (first char-list))
+;           (list-body (rest char-list)))
+;       (if (null is-in-string)
+;           (cond ((eql list-head #\")
+;                  (append (list list-head) 
+;                          (remove-white-spaces list-body T)))
+;                 ((member list-head spaces) 
+;                  (remove-white-spaces list-body nil))
+;                 (T (append (list list-head) 
+;                            (remove-white-spaces
+;                             list-body nil)))
+;                 )
+;        (if (eql list-head #\") 
+;            (append (list list-head) 
+;                    (remove-white-spaces 
+;                     list-body 
+;                     nil)) 
+;          (append (list list-head) 
+;                  (remove-white-spaces 
+;                   list-body 
+;                   T)))
+;        ))))
 
+;;; (nil)
+;;; "pippo" <- OK 
 
 
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
@@ -50,12 +57,25 @@
   (let ((curr-char (first char-list))
         (list-rest (rest char-list)))
     (if (eql curr-char #\") 
-        (append acc  nil)
+        (list (append acc  nil) list-rest)
       (parse-string list-rest 
                     (append acc
                            (list curr-char) ))
      )
 ))
 
-(defun tokenize (json-char-list tokenized-list) 
-  (if (null json-char-list) (list nil) ))
+;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
+
+(defun tokenize (char-list acc) 
+  (let ((head-list (first char-list)) 
+        (tail-list (rest char-list))) 
+    (if (null char-list) nil 
+      (cond ((eql head-list #\{ ) (append acc (list "OPEN-CURLY") )) )
+    )
+  
+  )
+
+
+  )
+
+;;; ((OPEN CURLY) )
