@@ -1,6 +1,6 @@
 %per if_/3 e reification pr
-:- use_module(library(reif)).
-:- use_module(library(prolog_pack)). %for managing packs using pack_install/1
+%:- use_module(library(reif)).
+%:- use_module(library(prolog_pack)). %for managing packs using pack_install/1
 
 %%main functions:
 
@@ -375,7 +375,7 @@ try2(E,R):-
 %string_obj/2
 string_obj(S, O):-
     string_tokens(S, T),
-    trace,
+    %trace,
     tokens_jsonobj(T, O).
 
 %r/0
