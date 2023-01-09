@@ -2,10 +2,29 @@
 :- use_module(library(reif)).
 :- use_module(library(prolog_pack)). %for managing packs using pack_install/1
 
-tokenize(T):-
+%%main functions:
+
+%jsonparse/2
+jsonparse(S, O):-
+    atom_codes(S, C),
+    codes_tokens(C, TWW),
+    remove_whitespaces(TWW, T),
+    tokens_jsonobj(T, O).
+
+
+%jsonread/2
+jsonread(FileName, Jobj):-
+    read_file_to_string(FileName, S, []),
+    jsonparse(S, Jobj).
+
+
+
+%debug
+%tokenizefile/1
+tokenizefile(T):-
   read_file_to_codes("in.txt", X, []),
   codes_tokens(X,T).
-
+%t/1
 t(O):-
   read_file_to_codes("in.txt", X, []),
   codes_tokens(X, T1),
@@ -306,6 +325,7 @@ tokens_elements_rest(["CLOSEDBRACKET"|Rest], [], Rest):-
 tokens_elements_rest(C, [V|V2], Rest):-
     tokens_value_rest(C, V, R1),
     R1 = ["COMMA"|R2],
+    !,
     tokens_elements_rest(R2, V2, Rest).
 
 %% [V] because it's == to [V|[]],
@@ -339,7 +359,7 @@ tokens_elements_rest(C, [V], Rest):-
     % nocomma so it's just V1
     %tokens_elements_rest(R1, V2, Rest).
 
-try(E,R):-
+try3(E,R):-
     string_tokens('1,2,3]',T),
     trace,
     tokens_elements_rest(T,E,R).
@@ -363,3 +383,66 @@ r():-
     notrace,
     nodebug,
     [tokenizer].
+
+%jsonaccss/3
+%jsonaccess(O, F, R):-
+
+%che minchia e questa roba
+%jsonaccess(X, [], X):-
+%    X = jsonobj(_). %% fails if array
+
+
+%jsonaccess(jsonarray(_), [], []).
+
+%PAIR
+%BaseCase
+jsonaccess((_, X), [], X). %% found result as pair, returning item
+%RecursiveCase
+jsonaccess((_, X), L, R):-
+    jsonaccess(X, L, R).
+
+%% basecase matches all
+jsonaccess(X, [], X).
+
+
+%ARRAY
+jsonaccess(jsonarray(A), [F|Fs] , R):-
+    integer(F),
+    F >= 0,
+    nth0(F , A , X),
+    jsonaccess(X, Fs , R).
+
+%% field matches
+jsonaccess(O, [F|Fs], R):-
+    O = jsonobj(UnwrappedO),
+    member((F, X), UnwrappedO),
+    jsonaccess(X, Fs, R).
+
+%% fails if obj it goes empty, and i still have
+%% a list of fields to check
+
+%% use integer/1 to check
+try(Res):-
+    jsonparse('{"a" : [100, {"tipo" : [65,66,67] }, 120, 130] , "b" : 20, "c" : 30}', WX),
+    %trace,
+    jsonaccess(WX, [a,1,tipo], Res).
+    %jsonaccess(R1, [1], Res).
+
+try2(Res):-
+    jsonparse('{"ciao": {}}', WX),
+    write(WX),
+    trace,
+    jsonaccess(WX, [ciao], Res),
+    !.
+
+
+try3(Res):-
+    jsonparse('[1,2,{"ciao": 10},4,5]', WX),
+    write(WX),
+    trace,
+    jsonaccess(WX, [2], Res),
+    !.
+
+
+
+%% todo, try jasonparse using a string not enquoting it nd spot where it errors
