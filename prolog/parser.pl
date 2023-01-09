@@ -89,63 +89,7 @@ tokens_elements_rest(C, [V], Rest):-
     R1 = ["CLOSEDBRACKET"|Rest],
     !.
 
-
-
-
-    
-
-
-
-%tokens_elements_rest(C, [V1|V2], Rest):-
- %   tokens_value_rest(C, V1, [R1|R1s]),
-  %  R1 = "COMMA",
-   % tokens_elements_rest(R1s, V2, Rest).
-
-%tokens_elements_rest(C, [V1|V2], Rest):-
- %   tokens_value_rest(C, V1, R1),
-  %  tokens_elements_rest(R1, V2, Rest).
-
-
-%tokens_elements_rest(C, [V], Rest):-
- %   tokens_value_rest(C, V, ["CLOSEDBRACKET"|Rest]),
-  %  !.
-    % nocomma so it's just V1
-    %tokens_elements_rest(R1, V2, Rest).
-
-try3(E,R):-
-    string_tokens('1,2,3]',T),
-    trace,
-    tokens_elements_rest(T,E,R).
-
-try2(E,R):-
-    string_tokens('"A": 1, "B": 2 }',T),
-    write(T),
-    trace,
-    tokens_members_rest(T,E,R).
-
-
-
-%string_obj/2
-string_obj(S, O):-
-    string_tokens(S, T),
-    %trace,
-    tokens_jsonobj(T, O).
-
-%r/0
-r():-
-    notrace,
-    nodebug,
-    [tokenizer].
-
-%jsonaccss/3
-%jsonaccess(O, F, R):-
-
-%che minchia e questa roba
-%jsonaccess(X, [], X):-
-%    X = jsonobj(_). %% fails if array
-
-
-%jsonaccess(jsonarray(_), [], []).
+%jsonaccess/3
 
 %PAIR
 %BaseCase
@@ -153,10 +97,8 @@ jsonaccess((_, X), [], X). %% found result as pair, returning item
 %RecursiveCase
 jsonaccess((_, X), L, R):-
     jsonaccess(X, L, R).
-
 %% basecase matches all
 jsonaccess(X, [], X).
-
 
 %ARRAY
 jsonaccess(jsonarray(A), [F|Fs] , R):-
@@ -170,28 +112,5 @@ jsonaccess(O, [F|Fs], R):-
     O = jsonobj(UnwrappedO),
     member((F, X), UnwrappedO),
     jsonaccess(X, Fs, R).
-
 %% fails if obj it goes empty, and i still have
 %% a list of fields to check
-
-%% use integer/1 to check
-try(Res):-
-    jsonparse('{"a" : [100, {"tipo" : [65,66,67] }, 120, 130] , "b" : 20, "c" : 30}', WX),
-    %trace,
-    jsonaccess(WX, [a,1,tipo], Res).
-    %jsonaccess(R1, [1], Res).
-
-try2(Res):-
-    jsonparse('{"ciao": {}}', WX),
-    write(WX),
-    trace,
-    jsonaccess(WX, [ciao], Res),
-    !.
-
-
-try3(Res):-
-    jsonparse('[1,2,{"ciao": 10},4,5]', WX),
-    write(WX),
-    trace,
-    jsonaccess(WX, [2], Res),
-    !.
