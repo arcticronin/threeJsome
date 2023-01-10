@@ -20,12 +20,15 @@
   (coerce char-list 'string))
 
 
-; (count #\a "banana")
 
 (defun string-to-number (string)
-  (cond (not (float-integrity) 
-    (error "MALFORMED FLOAT"))
-    ((null (find #\. string)) parse-integer string)
+  (cond 
+  ( (not (float-integrity string))
+    (error "MALFORMED FLOAT")
+    )
+
+
+    ((null (find #\. string)) (parse-integer string))
     (T (parse-float string))
     )
 )     
@@ -83,26 +86,7 @@
 
 
 
-      ;       (cond ((and floating-part 
-      ;             (not 
-      ;              (member curr-char 
-      ;                      digits))) 
-      ;        (error "MALFORMED NUMBER"))
-             
-      ;       ((eql curr-char #\.)
-      ;        (parse-number rest-list 
-      ;                      (append acc 
-      ;                              (list curr-char)) 
-      ;                      T))
-      ; ((member curr-char
-      ;          digits) 
-      ;  (parse-number 
-      ;   rest-list 
-      ;   (append acc 
-      ;           (list curr-char))
-      ;   floating-part))
-      ; (T (list (char-list-to-string 
-      ;     (append acc  nil))  char-list)))
+     
 
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
 
@@ -143,16 +127,16 @@
           ;;;TOKENIZE-NUMBER
           ((member head-list 
                    full-number-symbols) 
-           (let (parsed-number-data 
+           (let ((parsed-number-data 
                  (parse-number 
-                  char-list))
+                  char-list)))
  
              (tokenizer 
               (cadr parsed-number-data) 
               (append acc 
                       (list 
                        (tokenize-number 
-                        (car parsed-number-data)))))))
+                        (string-to-number (car parsed-number-data))))))))
           ;;;ELSE CASE      
           (T (tokenizer tail-list 
                         (append acc 
