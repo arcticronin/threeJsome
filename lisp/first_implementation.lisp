@@ -3,6 +3,8 @@
 (defparameter brackets (append curly-brackets squared-brackets))
 (defparameter spaces '(#\Space #\Newline #\Tab))
 (defparameter apix '(#\" #\'))
+(defparameter token-column (list "COLON"))
+(defparameter token-comma (list "COMMA"))
 ;;; NOTE ! #\{carattere_a_piacere} <- è la notazione per i caratteri in lisp
 
 
@@ -58,27 +60,59 @@
   (let ((curr-char (first char-list))
         (list-rest (rest char-list)))
     (if (eql curr-char #\") 
-        (list (append acc  nil) list-rest)
+        (list 
+         (char-list-to-string 
+          (append acc  nil)) 
+         list-rest)
       (parse-string list-rest 
                     (append acc
-                           (list curr-char) ))
-     )
+                            (list curr-char)))
+      )
 ))
 
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
 
 (defun tokenizer (char-list acc) 
-  (let ((head-list (first char-list)) 
-        (tail-list (rest char-list))) 
-    (if (null char-list) 
+  (let ((head-list 
+         (first char-list)) 
+        (tail-list 
+         (rest char-list)))
+ 
+    (if (null char-list)
+        ;;;base case 
         (append acc char-list)
-      (cond ((eql head-list #\{ ) 
+      ;;;tokenize brackets
+      (cond ((member head-list brackets) 
              (tokenizer tail-list 
-                        (append acc (list "OPENCURLY"))))
+                        (append acc 
+                                (tokenize-brackets
+                                 head-list))))
+            ;;;TOKENIZE COMMA
+            ((eql head-list #\:) 
+             (tokenizer tail-list 
+                        (append acc 
+                                token-column )))
+            ;;TOKENIZE COMMA
+            ((eql head-list #\,) 
+             (tokenizer tail-list 
+                        (append acc 
+                                token-comma)))
+            ;;;TOEKNIZE STRING
+            ((eql head-list #\") 
+             (let ((parsed-string-data 
+                    (parse-string tail-list)))
+ 
+          (tokenizer (cadr
+                      parsed-string-data)
+                     
+          (append acc 
+                  (list 
+                   (tokenize-string (car parsed-string-data)))))))
 
-      (eql head-list #\} )
-             
-	    (T (append acc char-list))  
+      ;;;ELSE CASE      
+	    (T (tokenizer tail-list 
+          (append acc 
+            (list head-list))))  
        )
     )
   
@@ -90,15 +124,18 @@
 
 (defun tokenize-brackets (char) 
   (cond ((eql char #\{) 
-          (list "OPENCURLY"))
+         (list "OPENCURLY"))
         ((eql char #\}) 
-          (list "CLOSEDCURLY"))
+         (list "CLOSEDCURLY"))
         ((eql char #\[) 
-          (list "OPENBRACKET"))
+         (list "OPENBRACKET"))
         ((eql char #\]) 
-          (list "CLOSEDBRACKET"))
+         (list "CLOSEDBRACKET"))
  ))
 
+(defun tokenize-string (string-to-tokenize) 
+  (list "string-token" string-to-tokenize))
 
+ 
 
 ;;; ((OPEN CURLY) )
