@@ -1,9 +1,8 @@
 (defparameter curly-brackets '(#\{ #\}))
 (defparameter squared-brackets '(#\[ #\]))
-(defparameter brackets (append curly-brackets squared-brackets))
 (defparameter spaces '(#\Space #\Newline #\Tab))
 (defparameter apix '(#\" #\'))
-;;; NOTE ! #\{carattere_a_piacere} <- è la notazione per i caratteri in lisp
+;;; NOTE ! #\{carattere_a_piacere} <- Ã¨ la notazione per i caratteri in lisp
 
 
 ;;;; Given a string returns an array of characters
@@ -74,10 +73,9 @@
         (append acc char-list)
       (cond ((eql head-list #\{ ) 
              (tokenizer tail-list 
-                        (append acc (list "OPENCURLY"))))
-
-      (eql head-list #\} )
-             
+                        (append acc 
+                                (list "OPENCURLY"))))
+            ()
 	    (T (append acc char-list))  
        )
     )
@@ -86,19 +84,5 @@
   
 
   )
-
-
-(defun tokenize-brackets (char) 
-  (cond ((eql char #\{) 
-          (list "OPENCURLY"))
-        ((eql char #\}) 
-          (list "CLOSEDCURLY"))
-        ((eql char #\[) 
-          (list "OPENBRACKET"))
-        ((eql char #\]) 
-          (list "CLOSEDBRACKET"))
- ))
-
-
 
 ;;; ((OPEN CURLY) )
