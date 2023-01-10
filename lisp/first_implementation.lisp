@@ -5,7 +5,9 @@
 (defparameter apix '(#\" #\'))
 (defparameter token-column (list "COLON"))
 (defparameter token-comma (list "COMMA"))
-;;; NOTE ! #\{carattere_a_piacere} <- è la notazione per i caratteri in lisp
+(defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
+(defparameter symbols '(#\+))
+(defparameter full-number-symbols (append digits symbols))
 
 
 ;;;; Given a string returns an array of characters
@@ -17,39 +19,30 @@
 (defun char-list-to-string (char-list) 
   (coerce char-list 'string))
 
+
+; (count #\a "banana")
+
+(defun string-to-number (string)
+  (cond (not (float-integrity) 
+    (error "MALFORMED FLOAT"))
+    ((null (find #\. string)) parse-integer string)
+    (T (parse-float string))
+    )
+)     
+
+(defun float-integrity (string-number) 
+(eql (count #\. string-number) 1))
+
+  ; (if (null (find #\. string))
+  ;     (parse-integer string)
+  ;   (parse-float string))
+
+
 (defun remove-white-spaces (char-list) 
   (remove-if
    (lambda (char)
      (member char spaces))
    char-list))
-
-; (defun remove-white-spaces (char-list &optional is-in-string) 
-;   (if (null char-list) char-list
-;     (let ((list-head (first char-list))
-;           (list-body (rest char-list)))
-;       (if (null is-in-string)
-;           (cond ((eql list-head #\")
-;                  (append (list list-head) 
-;                          (remove-white-spaces list-body T)))
-;                 ((member list-head spaces) 
-;                  (remove-white-spaces list-body nil))
-;                 (T (append (list list-head) 
-;                            (remove-white-spaces
-;                             list-body nil)))
-;                 )
-;        (if (eql list-head #\") 
-;            (append (list list-head) 
-;                    (remove-white-spaces 
-;                     list-body 
-;                     nil)) 
-;          (append (list list-head) 
-;                  (remove-white-spaces 
-;                   list-body 
-;                   T)))
-;        ))))
-
-;;; (nil)
-;;; "pippo" <- OK 
 
 
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
@@ -70,9 +63,50 @@
       )
 ))
 
+
+;;; Dato una lista di caratteri in input restituisce una numero in forma stringa
+(defun parse-number (char-list &optional acc ) 
+  (let ((curr-char 
+         (first char-list))
+        (rest-list 
+         (rest char-list)))
+
+    (if (or (member curr-char digits) 
+      (eql curr-char #\.)) 
+        (parse-number rest-list 
+          (append acc (list curr-char))) 
+          (list (char-list-to-string 
+            (append acc nil)) 
+               char-list)) 
+    ))
+
+
+
+
+      ;       (cond ((and floating-part 
+      ;             (not 
+      ;              (member curr-char 
+      ;                      digits))) 
+      ;        (error "MALFORMED NUMBER"))
+             
+      ;       ((eql curr-char #\.)
+      ;        (parse-number rest-list 
+      ;                      (append acc 
+      ;                              (list curr-char)) 
+      ;                      T))
+      ; ((member curr-char
+      ;          digits) 
+      ;  (parse-number 
+      ;   rest-list 
+      ;   (append acc 
+      ;           (list curr-char))
+      ;   floating-part))
+      ; (T (list (char-list-to-string 
+      ;     (append acc  nil))  char-list)))
+
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
 
-(defun tokenizer (char-list acc) 
+(defun tokenizer (char-list &optional acc) 
   (let ((head-list 
          (first char-list)) 
         (tail-list 
@@ -97,29 +131,32 @@
              (tokenizer tail-list 
                         (append acc 
                                 token-comma)))
-            ;;;TOEKNIZE STRING
+            ;;;TOKENIZE STRING
             ((eql head-list #\") 
              (let ((parsed-string-data 
                     (parse-string tail-list)))
- 
           (tokenizer (cadr
-                      parsed-string-data)
-                     
+                      parsed-string-data)             
           (append acc 
                   (list 
                    (tokenize-string (car parsed-string-data)))))))
-
-      ;;;ELSE CASE      
-	    (T (tokenizer tail-list 
-          (append acc 
-            (list head-list))))  
-       )
-    )
-  
-  )
-  
-
-  )
+          ;;;TOKENIZE-NUMBER
+          ((member head-list 
+                   full-number-symbols) 
+           (let (parsed-number-data 
+                 (parse-number 
+                  char-list))
+ 
+             (tokenizer 
+              (cadr parsed-number-data) 
+              (append acc 
+                      (list 
+                       (tokenize-number 
+                        (car parsed-number-data)))))))
+          ;;;ELSE CASE      
+          (T (tokenizer tail-list 
+                        (append acc 
+                                (list head-list))))))))
 
 
 (defun tokenize-brackets (char) 
@@ -134,8 +171,9 @@
  ))
 
 (defun tokenize-string (string-to-tokenize) 
-  (list "string-token" string-to-tokenize))
-
+  (list "string-token"
+        string-to-tokenize))
+(defun tokenize-number (number-to-tokenize) 
+  (list "number-token"
+        number-to-tokenize))
  
-
-;;; ((OPEN CURLY) )
