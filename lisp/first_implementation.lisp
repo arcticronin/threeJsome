@@ -40,10 +40,10 @@
   ;   (parse-float string))
 
 
-(defun remove-white-spaces (char-list) 
+(defun remove-white-spaces-token (char-list) 
   (remove-if
    (lambda (char)
-     (member char spaces))
+     (member char token-white-space))
    char-list))
 
 
