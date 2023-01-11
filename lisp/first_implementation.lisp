@@ -7,6 +7,7 @@
 (defparameter token-comma (list "COMMA"))
 (defparameter token-white-space (list "WHITESPACE"))
 (defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
+;;;TODO FIXARE IL PARSER DEL NUMERO QUANDO HO UN MENO DENTRO!!
 (defparameter symbols '(#\+))
 (defparameter full-number-symbols (append digits symbols))
 
@@ -23,16 +24,13 @@
 
 
 (defun string-to-number (string)
-  (cond 
-  ( (not (float-integrity string))
-    (error "MALFORMED FLOAT")
-    )
+   (if (null (find #\. string))
+      (parse-integer string)
 
-
-    ((null (find #\. string)) (parse-integer string))
-    (T (parse-float string))
-    )
-)     
+     (cond ((null 
+             (float-integrity string)) 
+             (error "MALFORMED FLOAT"))     
+           (T (parse-float string)))))     
 
 (defun float-integrity (string-number) 
 (eql (count #\. string-number) 1))
@@ -87,7 +85,6 @@
 
 
 
-     
 
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
 
@@ -143,9 +140,7 @@
            (tokenizer tail-list
                       (append acc
                               token-white-space)))     
-          (T (tokenizer tail-list 
-                        (append acc 
-                                (list head-list))))))))
+          (T (error "MALFORMED JSON"))))))
 
 
 (defun tokenize-brackets (char) 
