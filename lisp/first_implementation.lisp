@@ -8,7 +8,7 @@
 (defparameter token-white-space (list "WHITESPACE"))
 (defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
 ;;;TODO FIXARE IL PARSER DEL NUMERO QUANDO HO UN MENO DENTRO!!
-(defparameter symbols '(#\+))
+(defparameter symbols '(#\+ #\-))
 (defparameter full-number-symbols (append digits symbols))
 
 
@@ -35,9 +35,6 @@
 (defun float-integrity (string-number) 
 (eql (count #\. string-number) 1))
 
-  ; (if (null (find #\. string))
-  ;     (parse-integer string)
-  ;   (parse-float string))
 
 
 (defun remove-white-spaces-token (char-list) 
@@ -125,16 +122,18 @@
           ;;;TOKENIZE-NUMBER
           ((member head-list 
                    full-number-symbols) 
-           (let ((parsed-number-data 
-                 (parse-number 
-                  char-list)))
- 
+           (let ((parsed-number-data
+                  (if (eql head-list #\-) 
+                      (parse-number tail-list 
+                                    (list #\-)) 
+                    (parse-number char-list))))
              (tokenizer 
               (cadr parsed-number-data) 
               (append acc 
                       (list 
                        (tokenize-number 
-                        (string-to-number (car parsed-number-data))))))))
+                        (string-to-number (car parsed-number-data)))))
+              )))
           ((member head-list 
                    spaces) 
            (tokenizer tail-list
