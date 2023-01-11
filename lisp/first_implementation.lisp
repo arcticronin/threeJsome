@@ -11,7 +11,12 @@
 (defparameter symbols '(#\+ #\-))
 (defparameter full-number-symbols (append digits symbols))
 
-
+(defun tokenize (string)
+  (remove-white-spaces-token 
+   (tokenize-char-list 
+    (string-to-list string))) 
+)
+ 
 ;;;; Given a string returns an array of characters
 (defun string-to-list (json-string)
     (coerce 
@@ -85,7 +90,7 @@
 
 ;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
 
-(defun tokenizer (char-list &optional acc) 
+(defun tokenize-char-list (char-list &optional acc) 
   (let ((head-list 
          (first char-list)) 
         (tail-list 
@@ -96,29 +101,32 @@
         (append acc char-list)
       ;;;tokenize brackets
       (cond ((member head-list brackets) 
-             (tokenizer tail-list 
+             (tokenize-char-list tail-list 
                         (append acc 
                                 (tokenize-brackets
                                  head-list))))
             ;;;TOKENIZE COMMA
             ((eql head-list #\:) 
-             (tokenizer tail-list 
+             (tokenize-char-list tail-list 
                         (append acc 
                                 token-column )))
             ;;TOKENIZE COMMA
             ((eql head-list #\,) 
-             (tokenizer tail-list 
+             (tokenize-char-list tail-list 
                         (append acc 
                                 token-comma)))
             ;;;TOKENIZE STRING
             ((eql head-list #\") 
              (let ((parsed-string-data 
                     (parse-string tail-list)))
-          (tokenizer (cadr
+          (tokenize-char-list (cadr
                       parsed-string-data)             
           (append acc 
                   (list 
-                   (tokenize-string (car parsed-string-data)))))))
+                   (tokenize-string (car parsed-string-data)))))
+          )
+             )
+
           ;;;TOKENIZE-NUMBER
           ((member head-list 
                    full-number-symbols) 
@@ -127,7 +135,7 @@
                       (parse-number tail-list 
                                     (list #\-)) 
                     (parse-number char-list))))
-             (tokenizer 
+             (tokenize-char-list 
               (cadr parsed-number-data) 
               (append acc 
                       (list 
@@ -136,7 +144,7 @@
               )))
           ((member head-list 
                    spaces) 
-           (tokenizer tail-list
+           (tokenize-char-list tail-list
                       (append acc
                               token-white-space)))     
           (T (error "MALFORMED JSON"))))))
