@@ -1,8 +1,8 @@
-%per if_/3 e reification pr
-%:- use_module(library(reif)).
-%:- use_module(library(prolog_pack)). %for managing packs using pack_install/1
+% per if_/3 e reification pr
+% :- use_module(library(reif)).
+% :- use_module(library(prolog_pack)). %for managing packs using pack_install/1
 
-%%main functions:
+%main functions:
 
 %jsonparse/2
 jsonparse(S, O):-
@@ -34,7 +34,7 @@ t(O):-
   write(O).
 
 %quick debug reason
-%remember to escape the "s
+%remember to escape the double quotes
 %string_tokens/2
 string_tokens(S,T):-
     atom_codes(S,C),

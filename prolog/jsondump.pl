@@ -64,6 +64,7 @@ prefix_list_rest(String, L, R):-
 try(R):-
     atom_chars("jsonarray([1,2,3])", L),
     R = (NI, L, P ,Rest),
+    gtrace,
     json_string(L, P, 0, NI, Rest).
 
 try2(R):-
