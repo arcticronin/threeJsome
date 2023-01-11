@@ -5,6 +5,7 @@
 (defparameter apix '(#\" #\'))
 (defparameter token-column (list "COLON"))
 (defparameter token-comma (list "COMMA"))
+(defparameter token-white-space (list "WHITESPACE"))
 (defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
 (defparameter symbols '(#\+))
 (defparameter full-number-symbols (append digits symbols))
@@ -137,7 +138,11 @@
                       (list 
                        (tokenize-number 
                         (string-to-number (car parsed-number-data))))))))
-          ;;;ELSE CASE      
+          ((member head-list 
+                   spaces) 
+           (tokenizer tail-list
+                      (append acc
+                              token-white-space)))     
           (T (tokenizer tail-list 
                         (append acc 
                                 (list head-list))))))))
@@ -160,4 +165,5 @@
 (defun tokenize-number (number-to-tokenize) 
   (list "number-token"
         number-to-tokenize))
+
  
