@@ -1,16 +1,83 @@
 (defun json-dump (lisp-json file-name) 
-  ;;; TARGET-VARIABLE IS WHERE THE DATA IS WRITTEN IN
+  ;;; TARGET-VARIABLE IS WHERE THE DATA IS WRITTEN IN AND SET ON FILE NAME
   (with-open-file (target-variable file-name 
                                    :direction :output
                                    :if-exists :supersede
                                    :if-does-not-exist :create)
     (format target-variable 
-            "aaa")))
+            (lisp-json-to-json lisp-json))))
+
+
+;; Transform JSON into a string
+
+(defun lisp-json-to-json (lisp-json)
+  (let ((head (first lisp-json))
+        (tail (rest lisp-json)) ) 
+    (cond ((eql head 
+                'jsonobj) 
+           (concatenate 'string 
+                        "{"
+                        (parse-lisp-obj tail)
+                        "}"))
+          ((eql head 
+                'jsonarr) 
+           (concatenate 'string 
+                        "["
+                        (parse-lisp-arr tail)
+                        "]"))
+          (T (error "MALFORMED OBJECT")))))
+
+(defun parse-lisp-obj (json-lisp) 
+  (let ((head (first json-lisp))
+        (tail (rest json-lisp))) 
+    (if (null json-lisp) "" 
+      (concatenate 'string 
+                   (stringify-key-value-lisp-json head)
+                   (if (last-pair tail) "" ",")
+                   (parse-lisp-obj tail))
+        )))
+
+(defun parse-lisp-arr (json-lisp) 
+  (let 
+      ((head (first json-lisp))
+       (tail (rest json-lisp))) 
+    
+    (if (null json-lisp) "" 
+      (concatenate 'string 
+                   (stringify-value-lisp-json head)
+                   (if (null tail) "" ",")
+                   (parse-lisp-arr tail)
+                       ))))
+;; key-value ->  (x y)
+(defun stringify-key-value-lisp-json (key-value) 
+  (let ((key (first key-value))
+        (value (cadr key-value)))
+    (concatenate 'string 
+                  (stringify-lisp-value key)
+                  ":"
+                  (stringify-value-lisp-json value))
+  ))
+
+
+(defun stringify-value-lisp-json (value)
+  (cond ((numberp value) 
+          (prin1-to-string value))
+        ((stringp value) 
+          (stringify-lisp-value value))
+        ;;CASE IN WHICH IS NOT A NUMBER NOT A STRING IS A COMPOUND VALUE EITHER JSONOBJ OR JSONARRAY
+        (T (lisp-json-to-json value))
+          ))
+
+(defun last-pair (json-object-lisp) 
+  (eql (length json-object-lisp) 0)
+  )
+;;; take a lisp valeu and converts it in a string with apix 
+(defun stringify-lisp-value (value) 
+  (concatenate 'string "\"" value "\""))
 
 
 
-
-
+;;;begin json read
 (defun json-read (filename) 
   (with-open-file (input-stream filename 
                                 :if-does-not-exist :error
@@ -18,7 +85,6 @@
                                   
     (stream-to-string input-stream)
     ))
-
 
 
 

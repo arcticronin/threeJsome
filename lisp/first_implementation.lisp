@@ -7,10 +7,12 @@
 (defparameter token-comma (list "COMMA"))
 (defparameter token-white-space (list "WHITESPACE"))
 (defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
-;;;TODO FIXARE IL PARSER DEL NUMERO QUANDO HO UN MENO DENTRO!!
+
 (defparameter symbols '(#\-))
 (defparameter full-number-symbols (append digits symbols))
 
+
+;;;TODO AGGIUNGERE IL CASO DI TRUE E FALSE
 (defun tokenize (string)
   (remove-white-spaces-token 
    (tokenize-char-list 
