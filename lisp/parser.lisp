@@ -1,3 +1,6 @@
+(defparameter k '(
+                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))
+
 (defparameter j '("OPENCURLY"
                  ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
                  ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
@@ -19,17 +22,14 @@
              (error "eof before parsing main object"))
             ((string-equal (first tokens) "OPENCURLY")
              (and (write "parsed mainobj -> obj")
-                  (cons 'jsonobj (parse-members (cdr tokens)))))
+                  (list 'jsonobj (parse-members (cdr tokens)))))
             ((string-equal (first tokens) "OPENBRACKET")
              (and (write "parsed mainobj -> arr")
-                  (cons 'jsonarray (parse-members (cdr tokens)))))
+                  (list 'jsonarray (parse-members (cdr tokens)))))
             (T (error "error in parsing main Jsonobj"))))
 
 
-;; parse value
-(defun parse-members (tokens) ;; TIP use a let to bind first-token
-;; at least 2 values, cause i need to close the parenthesis later,
-;; and it also gives me error on get-token-type
+(defun parse-members (tokens)
   (if (>= (length tokens) 1)
       (let*  ((token (first tokens))
               (t-type (get-token-type token)))
@@ -39,22 +39,49 @@
            ())
           ((not (string-equal (get-token-type (second tokens)) "COLON" ))
            (error "unexpected separator during member parsing"))
-          ((string-equal (get-token-type (second tokens)) "COLON")
+          ((and
+            (string-equal (get-token-type (second tokens)) "COLON")
+            (string-equal t-type "string-token" ))
            (and
-            (string-equal t-type "string-token" )
             (write "members -> value") ;; check for null? here on in value?
-            (list 'pair (second token) 'parsefrom (cdddr tokens))))
+            ;(list (list 'pair (second token) (list 'parsefrom (cddr tokens))))
+            (let* (
+                   (result (parse-value (cddr tokens)))
+                   (tail (second result))
+                   (first-pair  (list
+                                 'pair
+                                 (second token)
+                                 (first result)))
+                   )
+              (let* next (
+                          (cond
+                            ((is-comma-t (first tail))())
+                            ((is-closedb-t)(first tail)())
+                            )
+
+                          )
+               if (is-comma-t (first tail )) ;; in case I have a comma
+               (list
+                first-pair
+                (parse-members (cdr tail)) ;; skip a comma and try to parse new member
+               )
+               (list
+                first-pair
+            ))
           (T
            (error "error while parsing object"))))
       (error "eol reached while parsing value")))
 
+(defun parse-value2(tk1) ; -> (value rest)
+  tk1)
 
-
-;;
-  ;; parse value
 (defun parse-value (tokens) ;; TIP use a let to bind first-token
+
 ;; at least 2 values, cause i need to close the parenthesis later,
 ;; and it also gives me error on get-token-type
+;;
+;; try to return rest or implement a 2 cases switch in case
+;; of values in an array, or in a member
   (if (>= (length tokens) 1)
       (let* ((token (first tokens))
               (t-type (get-token-type token)))
@@ -63,10 +90,9 @@
             (write "chiamata parse-obj"))
            ((string-equal t-type "OPENBRACE" )
             (write "chiamata parse-array"))
-           ((string-equal t-type "string-token") ;; TODO same outcome : unify onto same case
-            (and (write "mi esce") (second token)))
-           ((string-equal t-type "number-token")
-            (and (write "mi esce") (second token)))
+           ((or(string-equal t-type "string-token")
+               (string-equal t-type "number-token"))
+            (and (write "mi esce") (list (second token) (rest tokens))))
            (T (error "error while parsing value"))))
       (error "eol reached while parsing value")))
 
@@ -101,3 +127,34 @@
      (and (write token)
           (error "cannot infer token type"))
      )))
+
+(defun is-comma-t (token)
+  (string-equal
+   (get-token-type token)
+   "COMMA")
+  ) ;; comma token predicate
+(defun is-closedb-t (token)
+  (string-equal
+   (get-token-type token)
+   "CLOSEDBRACKET")
+  ) ;; comma token predicate
+(defun is-openb-t (token)
+  (string-equal
+   (get-token-type token)
+   "OPENBRACKET")
+  ) ;; comma token predicate
+(defun is-openc-t (token)
+  (string-equal
+   (get-token-type token)
+   "OPENCURLY")
+  ) ;; comma token predicate
+(defun is-closedc-t (token)
+  (string-equal
+   (get-token-type token)
+   "CLOSEDCURLY")
+  )
+(defun is-colon-t (token)
+  (string-equal
+   (get-token-type token)
+   "COLON")
+  )
