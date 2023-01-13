@@ -8,7 +8,7 @@
 (defparameter token-white-space (list "WHITESPACE"))
 (defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
 ;;;TODO FIXARE IL PARSER DEL NUMERO QUANDO HO UN MENO DENTRO!!
-(defparameter symbols '(#\+ #\-))
+(defparameter symbols '(#\-))
 (defparameter full-number-symbols (append digits symbols))
 
 (defun tokenize (string)
