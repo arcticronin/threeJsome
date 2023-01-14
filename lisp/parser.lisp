@@ -29,12 +29,16 @@
 ;;object =  | (jsonobj Members)
 ;;
 ;;
+;;jsonarray =  | (jsonarray elements)
+;;
+;;elements =    | (Value | values)
+;;              | ()
+;;
 ;;members=  | ()
 ;;          | (Pair | MoreMembers)
 ;;
 ;;Pair=     | (Id value)
 ;;
-;;Att=      |(second token) ;; che sarebbe la stringa
 ;;
 ;;value=    |string
 ;;          |number
@@ -45,20 +49,23 @@
 ;; funzione che viene chiamata per prima. prende il risultato di tutto
 ;; poi dovrò controllare che rest sia vuoto e così l'oggetto è ben formato
 (defun json-parse (tokens)
-  (let*  ((o-r (parse-obj tokens))
-          (obj (first o-r))
-          (rest (second o-r)))
-     (list(list obj) rest))
+  (let*   ((o-r (parse-obj tokens))
+          (obj (first o-r))  ;; 2 casi --> array, obj --->> tutto / oppuper rimuover il primo ..> tokens
+           ;;                                                                                 ..> (cdr tokens)
+          (rest-tokens (second o-r)))
+     (list obj rest-tokens))
   )
 
+
+;; > sposta check su, solo obj
 (defun parse-obj (tokens) ;; --> object rest
-  ;;                                        |--> (list (jsonarray roba) rest-tokens)
+  ;;                                        |--> (list (jsonarray roba) rest-tokens) NOOOOO
   ;;                                        |--> (list (jsonobj roba) rest-tokens)
         (cond
             ((null tokens)
              (error "eof before parsing object"))
             ((is-openc-t (first tokens))
-             (let* ((m-r (parse-members ))
+             (let* ((m-r (parse-members (rest tokens) ))
                     (members (first m-r))
                     (rest (second m-r)))
                (and (write "parsed obj -> jsonobj")
@@ -66,9 +73,9 @@
                      (list 'jsonobj members)
                      rest))))
             ((is-openb-t (first tokens))
-             (let* ((m-r (parse-array ))
-                    (array (first m-r))
-                    (rest (second m-r)))
+             (let* ((e-r (parse-array )) ;; dai un occhio
+                    (array (first e-r))
+                    (rest (second e-r)))
                (and (write "parsed array -> jsonarray")
                     (list
                      (list 'jsonarray array)
