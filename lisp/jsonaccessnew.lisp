@@ -1,9 +1,12 @@
 (defun jsonaccess (obj fields)
-  (if (null fields) ()
-    (error "stringa nulla"))
-  (let* (f(if (listp fields ) fields
-           (list fields)))
-    (jsonaccess-from-list (obj f))))
+  (if (stringp fields)
+      (jsonaccess-from-list obj (list fields))
+    (jsonaccess-from-list obj fields)))
+
+(defun string-to-list (x)
+  (if (stringp x)
+      (list x)
+    x))
           
 
 (defun jsonaccess-from-list (obj fields)
@@ -18,3 +21,4 @@
                            (second (assoc cur-key (rest obj) :test #'string=)))
                           (t (error "not a JSON object or array or not appropriate key" obj cur-key)))))
       (jsonaccess-from-list current (rest fields))))) 
+
