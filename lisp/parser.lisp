@@ -1,5 +1,6 @@
 (defparameter k '(
-                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))
+                 ("string-token" "nome") "COLON"
+                  ("string-token" "Arthur") "CLOSEDCURLY"))
 
 (defparameter j '("OPENCURLY"
                  ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
@@ -40,41 +41,39 @@
 ;;          |object
 
 
-;; first parse object, the rest must be [] at the end
-(defun parse-main-obj (tokens) ;; refactor with get-token-type
-           (cond
-            ((null tokens)
-             (error "eof before parsing main object"))
-            ((string-equal (first tokens) "OPENCURLY")
-             (and (write "parsed mainobj -> it's an obj")
-                  (list 'jsonobj (parse-members (cdr tokens)))))
-            ((string-equal (first tokens) "OPENBRACKET")
-             (and (write "parsed mainobj -> it's an array")
-                  (list 'jsonarray (parse-members (cdr tokens)))))
-            (T (error "error in parsing main Jsonobj"))))
 
+;; funzione che viene chiamata per prima. prende il risultato di tutto
+;; poi dovrò controllare che rest sia vuoto e così l'oggetto è ben formato
+(defun json-parse (tokens)
+  (let*  ((o-r (parse-obj tokens))
+          (obj (first o-r))
+          (rest (second o-r)))
+     (list(list obj) rest))
+  )
 
-(defun parse-obj (tokens)
+(defun parse-obj (tokens) ;; --> object rest
+  ;;                                        |--> (list (jsonarray roba) rest-tokens)
+  ;;                                        |--> (list (jsonobj roba) rest-tokens)
         (cond
             ((null tokens)
              (error "eof before parsing object"))
             ((is-openc-t (first tokens))
-             (and (write "parsed obj -> jsonobj")
-                  (list 'jsonobj
-                        (parse-members (cdr tokens))
-                        )))
-            (T (error "error in parsing Jsonobj"))))
-
-(defun parse-array (tokens)
-        (cond
-            ((null tokens)
-             (error "eof before parsing array"))
+             (let* ((m-r (parse-members ))
+                    (members (first m-r))
+                    (rest (second m-r)))
+               (and (write "parsed obj -> jsonobj")
+                    (list
+                     (list 'jsonobj members)
+                     rest))))
             ((is-openb-t (first tokens))
-             (and (write "parsed obj -> jsonobj")
-                  (list 'jsonarray
-                        (parse-elements (cdr tokens))
-                        )))
-            (T (error "error in parsing Jsonarray"))))
+             (let* ((m-r (parse-array ))
+                    (array (first m-r))
+                    (rest (second m-r)))
+               (and (write "parsed array -> jsonarray")
+                    (list
+                     (list 'jsonarray array)
+                     rest)))
+            (T (error "error in parsing object"))))
 
 
 (defun parse-members (tokens) ;; --> (members rest-of-tokens)
@@ -99,18 +98,19 @@
          (rest (second p-r)))
     (cond
       ((is-closedc-t (first rest)) ; --> base case, returning list of pairs, tokens
-       (list pairs tokens) ;; -> ((list of pairs) (rest of the tokens))
+       (list pairs tokens)) ;; -> ((list of pairs) (rest of the tokens))
        ;;remove or not the }, let's see
-       ((is-comma-t (first rest)))
+      ((is-comma-t (first rest))
        (parse-pairs-2
         (append pairs pair)
         (cdr rest) ;; remove comma and go on, trying to reach the base case (})
-        )
-       (T
-        (error "im here in the parse pair 2, i have to check some things"))
-      ))))
+        ))
+      (T
+       (error "im here in the parse pair 2, i have to check some things"))
+      )))
 
-
+;;;; non la uso
+;;;;
 ;pair = (id value)
 (defun parse-pair-rest(tokens) ;; --> ( (id value) rest-of-tokens)
   (if (and
@@ -162,12 +162,13 @@
 ;;
 ;;--> ((element-list), rest)
 (defun parse-elements_2 (elements tokens) ; farla come la parsemembers
-  (let (first-token (first tokens))
+  (let ((first-token (first tokens)))()
     (cond
-      ((null first-token)
-       (error "reached eof while parsing a jsonarray"))
-      ((string-equal first-token "CLOSEDBRACKET")
-       (list elements tokens)); return elements and rest of tokens
+      ((null fi):(rst-token)
+       (error "r(eached eof while parsing a (jsonarray"))
+      ((string):(-equal first-token "CLOSEDB(RACKET")
+       (list eleme):(nts tokens)); return elemen):w
+                            ts and rest of tokens
                              ; TODO manage ], yes or no?
       (let* ((v-r (parse-value-rest))
              (value (first v-r))
