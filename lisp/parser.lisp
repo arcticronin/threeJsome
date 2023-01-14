@@ -73,77 +73,48 @@
            (and (write "end of obj"))
            (list () (cdr tokens))) ;; return emtpy members and tokens except first
           (T
-           (parse-pairs tokens))))));; parse pair
-
+           (parse-pairs tokens))))));; parse pair starting with an empty pair
 
 (defun parse-pairs (tokens)
+  (parse-pairs-2 ( () tokens ))) ;; giusto per non chimaare titte le olte
+;; (parse-pairs  ()  tokens  )
+
+(defun parse-pairs-2 (pairs tokens)
   ;; it creates the pair list, checkes rest of the tokens
   ;; from the parse-pair fn
   (let* ((p-r (parse-pair-rest tokens))
          (pair (first p-r))
          (rest (second p-r)))
     (cond
-      ((is-closedc-t (first rest))
-       ())
-      (()
-       ())
-      )
-
-    )
-  )
-
-
-
-
-
-
-(defun parse-pair()
-((not (is-colon-t (second tokens)))
-           (error "unexpected separator during member parsing"))
-          ((and
-            (is-colon-t (second tokens))
-            (is-string-t (token) ))
-           (parse-pairs (cddr tokens)))
-          (T (error "error while parsing member"))
-          )
+      ((is-closedc-t (first rest)) ; --> base case, returning list of pairs, tokens
+       (pairs tokens) ;; -> ((list of pairs) (rest of the tokens))
+       ;;remove or not the }, let's see
+       ((is-comma-t (first rest)))
+       (parse-pairs-2
+        (append pairs pair)
+        (cdr rest) ;; remove comma and go on, trying to reach the base case (})
         )
-
-(and
-            (write "members -> value") ;; check for null? here on in value?
-            ;(list (list 'pair (second token) (list 'parsefrom (cddr tokens))))
-            (let* (
-                   (result (parse-value (cddr tokens)))
-                   (tail (second result))
-                   (first-pair  (list
-                                 'pair
-                                 (second token)
-                                 (first result)))
-                   )
-              (let* next (
-                          (cond
-                            ((is-comma-t (first tail))())
-                            ((is-closedb-t)(first tail)())
-                            )
-
-                          )
-               if (is-comma-t (first tail )) ;; in case I have a comma
-               (list
-                first-pair
-                (parse-members (cdr tail)) ;; skip a comma and try to parse new member
-               )
-               (list
-                first-pair
-            ))
-          (T
-
-
-  )
-
-(defun parse-key ()
+       (T
+        (error "im here in the parse pair 2, i have to check some things"))
+      ))))
 
 
 
-  )
+(defun parse-pair-rest(tokens) ;; --> ( (id value) rest-of-tokens)
+  (if (and
+       (is-string-t (first token))
+       (is-colon-t (second tokens)))
+      (let*
+          ((id (second (first-token)))
+           (v-r (parse-value-rest))
+           (value (first v-r))
+           (rest (second v-r)))
+        ((list
+          (list id value)
+          rest)))
+      (error "parse-pair-rest error, not in format (id : value)")
+      ))
+
 
 
 (defun parse-value2(tk1) ; -> (value rest)
