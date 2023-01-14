@@ -87,7 +87,7 @@
            (parse-pairs tokens))))));; parse pair starting with an empty pair
 
 (defun parse-pairs (tokens) ;; --> (pairs rest-of-tokens)
-  (parse-pairs-2 ( () tokens ))) ;; giusto per non chimaare titte le olte
+  (parse-pairs-2 () tokens))) ;; giusto per non chimaare titte le olte
 ;; (parse-pairs  ()  tokens  )
 
 (defun parse-pairs-2 (pairs tokens)
@@ -95,15 +95,15 @@
   ;; from the parse-pair fn
   (let* ((p-r (parse-pair-rest tokens))
          (pair (first p-r))
-         (rest (second p-r)))
+         (rest-tokens (second p-r)))
     (cond
-      ((is-closedc-t (first rest)) ; --> base case, returning list of pairs, tokens
+      ((is-closedc-t (first rest-tokens)) ; --> base case, returning list of pairs, tokens
        (list pairs tokens)) ;; -> ((list of pairs) (rest of the tokens))
        ;;remove or not the }, let's see
-      ((is-comma-t (first rest))
+      ((is-comma-t (first rest-tokens))
        (parse-pairs-2
-        (append pairs pair)
-        (cdr rest) ;; remove comma and go on, trying to reach the base case (})
+        (append pairs (list 'pair pair)) ;; to debug, later can be removed
+        (cdr rest-tokens) ;; remove comma and go on, trying to reach the base case (})
         ))
       (T
        (error "im here in the parse pair 2, i have to check some things"))
@@ -114,18 +114,15 @@
 ;pair = (id value)
 (defun parse-pair-rest(tokens) ;; --> ( (id value) rest-of-tokens)
   (if (and
-       (is-string-t (first token))
+       (is-string-t (first tokens))
        (is-colon-t (second tokens)))
       (let*
-          ((id (second (first-token)))
-           (v-r (parse-value-rest))
+          ((id (second (first tokens)))
+           (v-r (parse-value-rest (cddr tokens)))
            (value (first v-r))
-           (rest (second v-r)))
-        ((list
-          (list id value)
-          rest)))
-      (error "parse-pair-rest error, not in format (id : value)")
-      ))
+           (rest-tokens (second v-r)))
+        (list (list id value) rest-tokens))
+      (error "parse-pair-rest error, not in format (id : value)")))
 
 
 
@@ -162,13 +159,12 @@
 ;;
 ;;--> ((element-list), rest)
 (defun parse-elements_2 (elements tokens) ; farla come la parsemembers
-  (let ((first-token (first tokens)))()
+  (let ((first-token (first tokens)))
     (cond
-      ((null fi):(rst-token)
-       (error "r(eached eof while parsing a (jsonarray"))
-      ((string):(-equal first-token "CLOSEDB(RACKET")
-       (list eleme):(nts tokens)); return elemen):w
-                            ts and rest of tokens
+      ((null first-token)
+       (error "reached eof while parsing a jsonarray"))
+      ((string-equal first-token "CLOSEDBRACKET")
+       (list elements tokens)); return elements and rest of tokens
                              ; TODO manage ], yes or no?
       (let* ((v-r (parse-value-rest))
              (value (first v-r))
@@ -184,6 +180,9 @@
       (T
        (error "unexpected object while parsing an array")) ;; parse-error
       )))
+
+
+;; UTILS
 
 
 (defun get-token-type (token)
@@ -233,9 +232,23 @@
    (get-token-type token)
    "COLON")
   )
-
+(defun is-string-t (token)
+  (string-equal
+   (get-token-type token)
+   "string-token")
+  )
+(defun is-number-t (token)
+  (string-equal
+   (get-token-type token)
+   "number-token")
+  )
 
 ;;
+
+
+
+(defun jsonaccess (json &rest args)
+      (jsonaccess_ json args))
 
 (defun jsonaccess (json x)
   (if (stringp x)
@@ -247,3 +260,6 @@
       (list x)
       x)
   )
+
+(defun xx (&rest y)
+  y)
