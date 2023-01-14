@@ -29,4 +29,8 @@
 
 
 
-
+;;; test per jsonaccess (senza il parser)
+;stringa
+(defparameter x '(jsonobj ("nome" "arthur") ("cognome" "dent")))
+;stringa e array 
+(defparameter z '(jsonobj ("name" "zaphod") ("heads" (jsonarray (jsonarray "head1") (jsonarray "head2")))))
