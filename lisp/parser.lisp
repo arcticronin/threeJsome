@@ -17,7 +17,7 @@
 ;;
 (defparameter val '(("string-token" ciao) "CLOSEDBRACKET"))
 
-;; KET:
+;; KEY:
 ;; do one thing and do it well
 ;;
 ;;one function for each grammar rule
