@@ -46,31 +46,69 @@
             ((null tokens)
              (error "eof before parsing main object"))
             ((string-equal (first tokens) "OPENCURLY")
-             (and (write "parsed mainobj -> obj")
+             (and (write "parsed mainobj -> it's an obj")
                   (list 'jsonobj (parse-members (cdr tokens)))))
             ((string-equal (first tokens) "OPENBRACKET")
-             (and (write "parsed mainobj -> arr")
+             (and (write "parsed mainobj -> it's an array")
                   (list 'jsonarray (parse-members (cdr tokens)))))
             (T (error "error in parsing main Jsonobj"))))
 
 (defun parse-obj (tokens)
+        (cond
+            ((null tokens)
+             (error "eof before parsing object"))
+            ((string-equal (first tokens) "OPENCURLY")
+             (and (write "parsed obj -> jsonobj")
+                  (list 'jsonobj
+                        (parse-members (cdr tokens))
+                        )))
+            (T (error "error in parsing Jsonobj"))))
 
-  )
 
 (defun parse-members (tokens)
   (if (>= (length tokens) 1)
-      (let*  ((token (first tokens))
-              (t-type (get-token-type token)))
+      (let*  ((token (first tokens)))
         (cond
-          ((string-equal t-type "CLOSEDCURLY" )
+          ((is-closedc-t token)
            (and (write "end of obj"))
-           ())
-          ((not (string-equal (get-token-type (second tokens)) "COLON" ))
+           (list () (cdr tokens))) ;; return emtpy members and tokens except first
+          (T
+           (parse-pairs tokens))))));; parse pair
+
+
+(defun parse-pairs (tokens)
+  ;; it creates the pair list, checkes rest of the tokens
+  ;; from the parse-pair fn
+  (let* ((p-r (parse-pair-rest tokens))
+         (pair (first p-r))
+         (rest (second p-r)))
+    (cond
+      ((is-closedc-t (first rest))
+       ())
+      (()
+       ())
+      )
+
+    )
+  )
+
+
+
+
+
+
+(defun parse-pair()
+((not (is-colon-t (second tokens)))
            (error "unexpected separator during member parsing"))
           ((and
-            (string-equal (get-token-type (second tokens)) "COLON")
-            (string-equal t-type "string-token" ))
-           (and
+            (is-colon-t (second tokens))
+            (is-string-t (token) ))
+           (parse-pairs (cddr tokens)))
+          (T (error "error while parsing member"))
+          )
+        )
+
+(and
             (write "members -> value") ;; check for null? here on in value?
             ;(list (list 'pair (second token) (list 'parsefrom (cddr tokens))))
             (let* (
@@ -97,14 +135,6 @@
                 first-pair
             ))
           (T
-           (error "error while parsing object"))))
-      (error "eol reached while parsing value"))))))
-<<<<<<< HEAD
-
-
-
-(defun parse-pair()
-
 
 
   )
@@ -115,8 +145,6 @@
 
   )
 
-=======
->>>>>>> b240bb594da3181b3a6d5468d96cce97099ecf4f
 
 (defun parse-value2(tk1) ; -> (value rest)
   tk1)
@@ -128,6 +156,8 @@
 ;;
 ;; try to return rest or implement a 2 cases switch in case
 ;; of values in an array, or in a member
+;;
+;;remove t-type from left, and use a (is-openb token) etc, but later
   (if (>= (length tokens) 1)
       (let* ((token (first tokens))
               (t-type (get-token-type token)))
