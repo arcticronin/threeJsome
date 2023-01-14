@@ -53,19 +53,31 @@
                   (list 'jsonarray (parse-members (cdr tokens)))))
             (T (error "error in parsing main Jsonobj"))))
 
+
 (defun parse-obj (tokens)
         (cond
             ((null tokens)
              (error "eof before parsing object"))
-            ((string-equal (first tokens) "OPENCURLY")
+            ((is-openc-t (first tokens))
              (and (write "parsed obj -> jsonobj")
                   (list 'jsonobj
                         (parse-members (cdr tokens))
                         )))
             (T (error "error in parsing Jsonobj"))))
 
+(defun parse-array (tokens)
+        (cond
+            ((null tokens)
+             (error "eof before parsing array"))
+            ((is-openb-t (first tokens))
+             (and (write "parsed obj -> jsonobj")
+                  (list 'jsonarray
+                        (parse-elements (cdr tokens))
+                        )))
+            (T (error "error in parsing Jsonarray"))))
 
-(defun parse-members (tokens)
+
+(defun parse-members (tokens) ;; --> (members rest-of-tokens)
   (if (>= (length tokens) 1)
       (let*  ((token (first tokens)))
         (cond
@@ -75,7 +87,7 @@
           (T
            (parse-pairs tokens))))));; parse pair starting with an empty pair
 
-(defun parse-pairs (tokens)
+(defun parse-pairs (tokens) ;; --> (pairs rest-of-tokens)
   (parse-pairs-2 ( () tokens ))) ;; giusto per non chimaare titte le olte
 ;; (parse-pairs  ()  tokens  )
 
@@ -87,7 +99,7 @@
          (rest (second p-r)))
     (cond
       ((is-closedc-t (first rest)) ; --> base case, returning list of pairs, tokens
-       (pairs tokens) ;; -> ((list of pairs) (rest of the tokens))
+       (list pairs tokens) ;; -> ((list of pairs) (rest of the tokens))
        ;;remove or not the }, let's see
        ((is-comma-t (first rest)))
        (parse-pairs-2
@@ -99,7 +111,7 @@
       ))))
 
 
-
+;pair = (id value)
 (defun parse-pair-rest(tokens) ;; --> ( (id value) rest-of-tokens)
   (if (and
        (is-string-t (first token))
@@ -117,10 +129,7 @@
 
 
 
-(defun parse-value2(tk1) ; -> (value rest)
-  tk1)
 
-(defun parse-value (tokens) ;; TIP use a let to bind first-token
 
 ;; at least 2 values, cause i need to close the parenthesis later,
 ;; and it also gives me error on get-token-type
@@ -129,33 +138,51 @@
 ;; of values in an array, or in a member
 ;;
 ;;remove t-type from left, and use a (is-openb token) etc, but later
+
+(defun parse-value-rest (tokens) ;; TIP use a let to bind first-token
   (if (>= (length tokens) 1)
-      (let* ((token (first tokens))
-              (t-type (get-token-type token)))
+      (let* ((token (first tokens)))
          (cond
-           ((string-equal t-type "OPENCURLY" )
+           ((is-openc-t token)
             (write "chiamata parse-obj"))
-           ((string-equal t-type "OPENBRACE" )
+           ((is-openb-t token)
             (write "chiamata parse-array"))
-           ((or(string-equal t-type "string-token")
-               (string-equal t-type "number-token"))
-            (and (write "mi esce") (list (second token) (rest tokens))))
+           ((or
+             (is-string-t token)
+             (is-number-t token))
+            (and (write "mi esce il value base")
+                 (list (second token) (rest tokens))))
            (T (error "error while parsing value"))))
       (error "eol reached while parsing value")))
 
 
-;;parse elements
 (defun parse-elements (tokens)
-(let (first-token (first tokens))
-  (cond
-    ((null first-token)
-     (error "reached eof while parsing a jsonarray"))
-    ((string-equal first-token "CLOSEDBRACKET")
-     ()); return empty list
-    (()()) ;; parse-element in case of {
-    (()()) ;; parse-value in case of value
-    ((T)(error "unexpected object while parsing an array")) ;; parse-error
-    )))
+  (parse-elements_2 () tokens))
+;;parse elements
+;;
+;;--> ((element-list), rest)
+(defun parse-elements_2 (elements tokens) ; farla come la parsemembers
+  (let (first-token (first tokens))
+    (cond
+      ((null first-token)
+       (error "reached eof while parsing a jsonarray"))
+      ((string-equal first-token "CLOSEDBRACKET")
+       (list elements tokens)); return elements and rest of tokens
+                             ; TODO manage ], yes or no?
+      (let* ((v-r (parse-value-rest))
+             (value (first v-r))
+             (rest (second v-r)))
+        (cond
+          ((is-closedb-t (first rest))
+           (list elements tokens)) ;; manage ]
+          (parse-elements_2
+           (append elements element)
+           rest)
+          )
+        )
+      (T
+       (error "unexpected object while parsing an array")) ;; parse-error
+      )))
 
 
 (defun get-token-type (token)
