@@ -91,6 +91,11 @@ tokens_elements_rest(C, [V], Rest):-
 
 %jsonaccess/3
 
+%% case i have a string and not a list
+jsonaccess(A, S, R):-
+    string(S),
+    jsonaccess(A, [S], R).
+
 %PAIR
 %special case string TODO
 %BaseCase
@@ -100,6 +105,7 @@ jsonaccess((_, X), L, R):-
     jsonaccess(X, L, R).
 %% basecase matches all
 jsonaccess(X, [], X).
+
 
 %ARRAY
 jsonaccess(jsonarray(A), [F|Fs] , R):-

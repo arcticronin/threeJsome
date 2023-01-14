@@ -13,7 +13,7 @@ json_write(JSON, FileName) :-
 % Case in which there is a json_obj
 write_JSON(jsonobj(Members), Out) :-
     !,
-    write(Out, '{'),
+    write(Out, "{"),
     write_members(Members, Out),
     write(Out, '}').
 
@@ -129,5 +129,16 @@ r:-
 
 try(X):-
     jsonread('in.txt', X),
-    trace,
+    %trace,
     json_write(X, 'out.txt').
+
+%tab/2
+%tab(Int, String):-
+tab(0, []):-
+    !.
+tab(I, S):-
+    integer(I),
+    I >= 0,
+    NI is I - 1,
+    append(['\t'], S2 , S),
+    tab(NI, S2).
