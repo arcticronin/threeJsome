@@ -8,12 +8,34 @@
 
 (defparameter compound-tokens '("string-token" "number-token"))
 (defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
-;; do one thing and do it well
 ;;
 (defparameter emptytok '("OPENCURLY" "CLOSEDCURLY"))
 ;; (parser(tokens) -> ( ( rest-of-tokens ) ( parsedvalue )) )
 ;;
 (defparameter val '(("string-token" ciao) "CLOSEDBRACKET"))
+
+;; KET:
+;; do one thing and do it well
+;;
+;;one function for each grammar rule
+;;
+;;main obj =| (jsonobj Members)
+;;          | (jsonarray Elements)
+;;
+;;object =  | (jsonobj Members)
+;;
+;;
+;;members=  | ()
+;;          | (Pair | MoreMembers)
+;;
+;;Pair=     | (Id value)
+;;
+;;Att=      |(second token) ;; che sarebbe la stringa
+;;
+;;value=    |string
+;;          |number
+;;          |object
+
 
 ;; first parse object, the rest must be [] at the end
 (defun parse-main-obj (tokens) ;; refactor with get-token-type
@@ -28,6 +50,9 @@
                   (list 'jsonarray (parse-members (cdr tokens)))))
             (T (error "error in parsing main Jsonobj"))))
 
+(defun parse-obj (tokens)
+
+  )
 
 (defun parse-members (tokens)
   (if (>= (length tokens) 1)
@@ -70,7 +95,22 @@
             ))
           (T
            (error "error while parsing object"))))
-      (error "eol reached while parsing value")))
+      (error "eol reached while parsing value"))))))
+
+
+
+(defun parse-pair()
+
+
+
+  )
+
+(defun parse-key ()
+
+
+
+  )
+
 
 (defun parse-value2(tk1) ; -> (value rest)
   tk1)
