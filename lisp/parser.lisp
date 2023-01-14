@@ -8,22 +8,6 @@
 (defparameter v '("OPENCURLY"
                  ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))                 
 
-;;; Definisco il mmetodo parse object -> Se trovo un open curly continua a parsare finché non trovo closed curly!
-;;; Se non trovo closed curly spaccati. se la stringa è vuota e non ho closed curly spaccati. <- tira fiori errore
-
-;;; parseObject -> head === "OPECURLY" -> Continua a parsare finchè non trovo CLOSED-CURLY . -> TROVO UN ALTRO OPEN CURLY ? RICHIAMATI
-;;; Appena trovo opencurly comunque inizio gia formare la lista tanto se non trovo closed curl si rompe esono a cavallo.
-
-;;; Come posso parsare i pair ? Come integro COLON e COMMA? SEMPLICE PARSE KEY E PARSE COLUMN
-;;; PARSE OBJECT KEY -> 1 HEAD DEVE SSERE LISTA TAIL DEVE ESSERE COLON 
-;;; PARSE VALUE -> HEAD DEVE ESSERE NUMERO STRINGA E BODY COMMA O CLOSED CURLY
-
-;;; PARSE ARRAY -> Guardo 1 elemento per forza compound -> Secondo elemento per forza un elemento seplice ovvero una COMMA
-                ;;PARSE-KEY - PARSE-VALUE
-
-;;; parseOBJ -> PARSE-PAIR(LIST) -> HEAD-LIST = ("STRING TOKEN" PINO) TAIL = (COLON "OPENBRACKET" (NUMBRER-TOKEN 1) "CLOSEDBRACKET" COMMA "COGNOME" COLON "DENT"))
-;;; PARSE-KEY (CDR PINO) . GUARDA HEAD DI TAIL -> COLON? -> PARSE-VALUE [LISTA DOPO COLON] -> PARSE VALUE <- CHECKA SE L'ELEMENTO è COMPOUND O NO ->  
-
 
 (defparameter compound-tokens '("string-token" "number-token"))
 (defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
