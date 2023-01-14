@@ -5,6 +5,9 @@
                  ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
                  ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
                  ("string-token" "eta") "COLON" ("number-token" 19) "CLOSEDCURLY" ))
+(defparameter v '("OPENCURLY"
+                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))                 
+
 
 (defparameter compound-tokens '("string-token" "number-token"))
 (defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
@@ -96,6 +99,7 @@
           (T
            (error "error while parsing object"))))
       (error "eol reached while parsing value"))))))
+<<<<<<< HEAD
 
 
 
@@ -111,6 +115,8 @@
 
   )
 
+=======
+>>>>>>> b240bb594da3181b3a6d5468d96cce97099ecf4f
 
 (defun parse-value2(tk1) ; -> (value rest)
   tk1)
@@ -148,7 +154,7 @@
     (()()) ;; parse-element in case of {
     (()()) ;; parse-value in case of value
     ((T)(error "unexpected object while parsing an array")) ;; parse-error
-    ))
+    )))
 
 
 (defun get-token-type (token)
