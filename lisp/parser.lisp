@@ -232,3 +232,17 @@
    (get-token-type token)
    "COLON")
   )
+
+
+;;
+
+(defun jsonaccess (json x)
+  (if (stringp x)
+      (jsonaccess_ json (list x))
+      (jsonaccess_ json x)))
+
+(defun string-to-list (x)
+  (if (stringp x)
+      (list x)
+      x)
+  )
