@@ -22,7 +22,8 @@
 (defparameter full-number-symbols (append digits symbols))
 
 (defparameter compound-tokens '("string-token" "number-token"))
-(defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
+(defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" 
+                              "CLOSEDBRACKET" "COMMA" "COLON"))
 
 
 ;;; BEGIN PARSER
@@ -462,21 +463,18 @@
                                 :direction :input) 
     ;;;TODO LUCA METTERE METODO 
     ;;; PL               
-    (stream-to-string input-stream)
+    (jsonparse (stream-to-string input-stream))
     ))
 
 
 
 ;;; GIVEN A STREAM RETURNS A STRING
 (defun stream-to-string (inputstream)
-  (let ((json (read-char inputstream 
-                         nil 
-                         'eof)))
-
-    (unless (eql json 'eof)
+  (let ((json (read-char inputstream
+                         nil 'eof)))
+    (if (eq json 'eof) ""
       (string-append json 
-                     (load-char inputstream)))
-      ))
+                     (stream-to-string inputstream)))))
 ;;; END OF INPUT OUTPUT
 
 

@@ -5,14 +5,16 @@
 (defparameter json-object-number "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\", \"eta\" : 19 }")
 (defparameter json-object-number-neg "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\", \"eta\" : -19 }")
 (defparameter json-object-number-float "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\", \"eta\" : 19.5 }")
-(defparameter json-object-nested "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\", \"nestato\" : 
-                                    {\"nome\" : \"pino\" \"cognome:\" \"joe\"} }")
+(defparameter json-object-nested "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\",\"nestato\" : 
+                                    {\"nome\" : \"pino\",\"cognome:\"\"joe\"} }")
+
+
 
 (defparameter json-object-array "{\"nome\" : \"Arthur\",\"cognome\" : \"Dent\", \"eta\" : [1,2,3] }")
 
 ;;;ARRAY
 (defparameter json-arr "[1, 2, 3]")
-(defparameter json-arr-mixed "[1,\"Ciao\" 3]")
+(defparameter json-arr-mixed "[1,\"Ciao\",3]")
 (defparameter json-arr-nested "[1, 2, [1, 2, 3]]")
 (defparameter json-arr-obj "[1, 2, {\"ciao\" : \"123\"} ]")
 (defparameter json-arr-nested-obj "[1, 2, {\"ciao\" : \"123\",\"vino\":{\"cc\":2}}]")
