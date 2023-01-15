@@ -5,7 +5,7 @@
 
 %%%% -*- Mode: Prolog -*-
 
-%%%% begin-of-file json-parsing.pl
+%%%% begin-of-file jsonparse.pl
 
 
 	
@@ -16,5 +16,5 @@
 
 
 
-%%%% end-of-file json-parsing.pl
+%%%% end-of-file jsonparse.pl
 
