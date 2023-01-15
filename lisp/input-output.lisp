@@ -1,4 +1,4 @@
-(defun json-dump (lisp-json file-name) 
+(defun jsondump (lisp-json file-name) 
   ;;; TARGET-VARIABLE IS WHERE THE DATA IS WRITTEN IN AND SET ON FILE NAME
   (with-open-file (target-variable file-name 
                                    :direction :output
@@ -20,7 +20,7 @@
                         (parse-lisp-obj tail)
                         "}"))
           ((eql head 
-                'jsonarr) 
+                'jsonarray) 
            (concatenate 'string 
                         "["
                         (parse-lisp-arr tail)
@@ -78,7 +78,7 @@
 
 
 ;;;begin json read
-(defun json-read (filename) 
+(defun jsonread (filename) 
   (with-open-file (input-stream filename 
                                 :if-does-not-exist :error
                                 :direction :input) 
