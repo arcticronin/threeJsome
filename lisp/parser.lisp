@@ -46,28 +46,13 @@
 (defparameter arr-nested-obj '("OPENBRACKET" ("number-token" 10) "COMMA" ("string-token" "Arthur") "OPENCURLY"("string-token" "neste nest") "COLON" ("string-token" "Arthur") "COMMA" 
   ("string-token" "eta") "COLON" ("number-token" 10) "CLOSEDCURLY" "CLOSEDBRACKET"))
 
-(defparameter arr-nested-arr 
-'("OPENBRACKET" "OPENBRACKET" ("number-token" 1) "COMMA" ("string-token" "gino") "COMMA" "OPENBRACKET" 
-("number-token" 1) "COMMA" "OPENBRACKET" "CLOSEDBRACKET"
-"CLOSEDBRACKET" "CLOSEDBRACKET" "CLOSEDBRACKET"))
 
-
-(defparameter valid-value-brackets '("OPENCURLY" "OPENBRACKET"))
-;;
-(defparameter emptytok '("OPENCURLY" "CLOSEDCURLY"))
-;; (parser(tokens) -> ( ( rest-of-tokens ) ( parsedvalue )) )
-;;
-(defparameter val '(("string-token" ciao) "CLOSEDBRACKET"))
 
 (defparameter json-object-type 'jsonobj)
 (defparameter json-array-type 'jsonarray)
-
 (defparameter compound-tokens '("string-token" "number-token"))
 (defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
-
-
-(defparameter v '("OPENCURLY"
-                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))   
+ 
 
 (defun json-parse (tokens) 
   (let ((head (first tokens)) 
@@ -227,33 +212,29 @@
   (let ((head (first tokens)) 
         (tail (rest tokens))) 
     (cond ((is-closedb-t head) 
-          (list (append (list json-array-type) (parse-array (append acc nil))) tail)
+           (list (append (list json-array-type)
+                         (parse-array (append acc 
+                                              nil)))
+                 tail)
           )
 
           ((or (is-openb-t head) (is-openc-t head)) 
-            (let ((complex-value (parse-complex-value
-                          tail
-                          head)))
-                (parse-array-value (cadr complex-value) (append acc (list (car complex-value))) 
-                )
-              )
-          )
-
-          (T (parse-array-value tail (append acc (list head))))
-
-    )
+           (let ((complex-value (parse-complex-value
+                                 tail
+                                 head)))
+             (parse-array-value (cadr complex-value) 
+                                (append acc
+                                        (list (car complex-value))) 
+                                )
+             )
+           )
+          
+          (T (parse-array-value tail 
+                                (append acc 
+                                        (list head))))
+       )
 ))
  
-    ; (if (is-closedb-t head)
-    ;     ;;Base case 
-    ;     (list (append (list json-array-type) 
-    ;                   (parse-array (append acc
-    ;                                          nil)))
-    ;           tail)
-    ;   ;;;RECURSIVE
-    ;   (parse-array-value tail 
-    ;                       (append acc 
-    ;                               (list head))))
 (defun parse-array (token-list &optional acc) 
   (let ((head (first token-list)) 
         (tail (rest token-list)))
@@ -268,7 +249,7 @@
                     tail) 
     (error "TRAILING COMMA"))
    ((is-comma-t head) (parse-array tail
-                                     acc))
+                                   acc))
 
    ((or (is-openb-t head) 
         (is-openc-t head)) 
@@ -276,24 +257,25 @@
                           tail
                           head))) 
       (parse-array (cadr complex-value) 
-                     (append acc
-                             (list (first
-                                    complex-value))))
+                   (append acc
+                           (list (first
+                                  complex-value))))
       ) 
     )
    (T (parse-array tail 
-                     (append acc
-                             (list (parse-array-simple-value head)))))))
-                             ))
+                   (append acc
+                           (list (parse-array-simple-value 
+                                  head)))))))
+    ))
   
   
 (defun parse-array-simple-value (value)
   (cond 
-        ((is-formed-obj value) value)
-        ((is-simple-value value) 
-        (extract-value value))
-        (T (error "MALFORMED ARRAY"))
-        ))
+   ((is-formed-obj value) value)
+   ((is-simple-value value) 
+    (extract-value value))
+   (T (error "MALFORMED ARRAY"))
+   ))
 
 
 ;;; Given a token list removes the last bracke in order to work only on members
@@ -372,5 +354,3 @@
    (get-token-type token)
    "number-token")
   )
-
-;;
