@@ -1,32 +1,24 @@
-
 (defparameter compound-tokens '("string-token" "number-token"))
 (defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
-;;
 (defparameter emptytok '("OPENCURLY" "CLOSEDCURLY"))
-;; (parser(tokens) -> ( ( rest-of-tokens ) ( parsedvalue )) )
-;;
 (defparameter val '(("string-token" "ciao") "CLOSEDBRACKET"))
-
 (defparameter emptytok2 '("OPENBRACKET" ("string-token" "uno") ("number-token" 2) "CLOSEDBRACKET"))
 
-;; To implement a recursive descent parser in Common Lisp,
-;; you can use a combination of functions and recursion to parse the list of tokens.
-;; You can define a separate function for each non-terminal symbol in your grammar,
-;; and use recursion to handle the production rules.
-;; Since you cannot use loops or assignments, you will need to use recursion
-;; to iterate through the list of tokens,
-;; and use pattern matching to identify the current token
-;; and determine which production rule to apply.
-;; To parse a simplified version of JSON,
-;; you will need to define functions for handling the
-;; JSON object and
-;; array structures, as well
-;; as functions for handling the various types of JSON values (strings, numbers, etc.).
+;;
+;;     PARSER
+;;
+
+(defun jsonparse-tokens (tokens)
+  (let
+      ((result (parse-json tokens)))
+    (if (null (second result))
+       (first result)
+       ;; ELSE
+       (error "cannot parse that string"))))
 
 (defun parse-json (tokens)
   (cond
     ((is-openc-t (car tokens))
-     ;(cons 'jsonobj (parse-object (cdr tokens))))
      (parse-object(cdr tokens)))
     ((is-openb-t (car tokens))
      (parse-array(cdr tokens)))
@@ -35,10 +27,10 @@
 
 (defun parse-object (tokens)
   (let*
-      ((objectparsed (parse-object_ tokens)))
-    (list (cons 'jsonobj (reverse (rest (reverse objectparsed))))
-          (last objectparsed)))
-  )
+      ((objectparsed (parse-object_ tokens))
+       (obj (reverse (rest (reverse objectparsed))))
+       (rest-tokens (first (reverse objectparsed))))
+    (list (cons 'jsonobj obj) rest-tokens)))
 
 
 (defun parse-object_ (tokens)
@@ -48,7 +40,7 @@
           (error "Missing closing '}'"))    ;; last element, tokens not a list anymore:
         ((and (stringp tokens)
               (is-closedc-t tokens))
-         ()) ;; '() -> first nil here an belo(parse-key-value kv1)w
+         '()) ;; '() -> first nil here
         ((is-closedc-t (first tokens))
          (list (cdr tokens))) ;; pop
         (t
@@ -59,22 +51,18 @@
            (cond
             ((is-comma-t (first next)) ;  \, case
              (cons pair (parse-object_ (cdr next)))) ;; pop
-             ;; check if it's giving problem if it's the last one,
-             ;; first is ("string-token")
             ((is-closedc-t (first next))
              (cons pair (parse-object_ next)))
-             ;;(cons value (parse-array next))) ;; check for }
             (t
              (error "object not well formed")))))))
-           ;; case }
-           ;; cae ,
+
 
 (defun parse-array (tokens)
   (let*
-      ((arrayparsed (parse-array_ tokens)))
-    (list (cons 'jsonarray (reverse (rest (reverse arrayparsed))))
-          (last arrayparsed)))
-  )
+      ((arrayparsed (parse-array_ tokens))
+       (array (reverse (rest (reverse arrayparsed))))
+       (rest-tokens (first (reverse arrayparsed))))
+    (list (cons 'jsonarray array) rest-tokens)))
 
 (defun parse-array_ (tokens)
   (cond ((or (null tokens)
@@ -94,15 +82,10 @@
            (cond
             ((is-comma-t (first next)) ;  \, case
              (cons value (parse-array_ (cdr next)))) ;; pop
-             ;; check if it's giving problem if it's the last one,
-             ;; first is ("string-token")
             ((is-closedb-t (first next))
              (cons value (parse-array_ next)))
-             ;;(cons value (parse-array next))) ;; check for }
             (t
              (error "array not well formed")))))))
-           ;; case }
-           ;; cae ,
 
 
 (defun parse-value (tokens)
@@ -116,18 +99,15 @@
             (string-equal token "number-token")))
        (list (second tokens) nil)) ;; ake some checks
       ;; ELSE
-      ((is-openc-t token) (parse-object (cdr tokens)));(parse-object (cdr tokens)))
-      ((is-openb-t token) (parse-array (cdr tokens)));(parse-array (cdr tokens)))
+      ((is-openc-t token) (parse-object (cdr tokens)))
+      ((is-openb-t token) (parse-array (cdr tokens)))
       (t (let ((token (first tokens)))
            (cond ((is-string-t token) (parse-string tokens)) ;; pop
                  ((is-number-t token) (parse-number tokens)) ;; pop
-                 ;;((eq token 'true) t)
-                                        ;((eq token 'false) nil)
-                                        ; ;((eq token 'null) nil)
-                 (t (error "Invalid JSON value")))))))) ;; also for nil
+                 (t (error "Invalid JSON value"))))))))
 
 
-(defun parse-string (tokens) ;; check here?
+(defun parse-string (tokens)
   (if (and
        (eq (length tokens) 2)
        (stringp (first tokens))
@@ -136,7 +116,7 @@
       ;;ELSE
       (list (second (first tokens)) (cdr tokens))))
 
-(defun parse-number (tokens) ;; check here?
+(defun parse-number (tokens)
   (if (and
        (eq (length tokens) 2)
        (stringp (first tokens))
@@ -171,8 +151,6 @@
      (first token))
     ( T
       (first token)
-     ;(and (write token)
-      ;    (error "cannot infer token type"))
      )))
 
 (defun is-comma-t (token)
@@ -185,7 +163,7 @@
   (string-equal
    (get-token-type token)
    "OPENBRACKET")
-  ) ;; comma token predicate
+  ) ;; token predicate
 
 (defun is-closedb-t (token)
   (string-equal
@@ -196,7 +174,7 @@
   (string-equal
    (get-token-type token)
    "OPENCURLY")
-  ) ;; comma token predicate
+  )
 (defun is-closedc-t (token)
   (string-equal
    (get-token-type token)
@@ -204,7 +182,7 @@
   )
 
 (defun is-colon-t (token)
-  (string-equal:q
+  (string-equal
    (get-token-type token)
    "COLON")
   )
@@ -220,58 +198,4 @@
    "number-token")
   )
 
-
-(defparameter y '(
-                 ("string-token" "nome") "COLON"
-                  ("string-token" "Arthur") "CLOSEDCURLY"))
-
-(defparameter k '("OPENCURLY"
-                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
-                 ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
-                 ("string-token" "eta") "COLON" ("number-token" 19) "CLOSEDCURLY"))
-
-(defparameter c '("OPENCURLY"
-                 ("string-token" "nome") "COLON" ("string-token" "JOE")
-                  "COMMA"  ("string-token" "cognome") "COLON"
-                  ("string-token" "Dent") "CLOSEDCURLY" ))
-
-
-(defparameter pino '("OPENCURLY"
-                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
-                 ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
-                 ("string-token" "eta") "COLON" ("number-token" 19) "COMMA" ("string-token" "nested") "COLON" "OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" "CLOSEDCURLY"))
-
-(defparameter arr '("OPENBRACKET" ("number-token" 1) "COMMA"
-                                  ("number-token" 2) "COMMA"
-                                  ("string-token" "TREEEEE")
-                          "COMMA" ("number-token" 4) "CLOSEDBRACKET"))
-
-(defparameter arr2 '( "OPENBRACKET" ("number-token" 1) "COMMA"
-                     "OPENBRACKET"("number-token" 2) "COMMA"
-                                  ("string-token" "TREEEEE") "CLOSEDBRACKET"
-                          "COMMA" ("number-token" 4) "CLOSEDBRACKET"))
-
-
-(defparameter ne '("OPENBRACKET" "OPENCURLY" "CLOSEDCURLY" "CLOSEDBRACKET"))
-
-
-(defparameter kv1 '(("string-token" "name") "COLON" ("number-token" 1) "CLOSEDBRACKET"))
-(defparameter kv2 '("OPENBRACKET" "OPENCURLY" "CLOSEDCURLY" "CLOSEDBRACKET"))
-
-(defparameter pino3 '(
-                       "OPENCURLY"
-                       ("string-token" "Nest 1") "COLON"
-                       "OPENCURLY"
-                       ("string-token" "Nest 2") "COLON"
-                       "OPENCURLY"
-                       ("string-token" "eta") "COLON" ("number-token" 19)
-                       "COMMA"
-                       ("string-token" "Nest 3")  "COLON"
-                       "OPENCURLY"
-                       ("string-token" "eta") "COLON" ("number-token" 19)
-                       "COMMA"
-                       ("string-token" "cognome") "COLON" ("string-token" "Dent")
-                       "CLOSEDCURLY"
-                       "CLOSEDCURLY"
-                       "CLOSEDCURLY"
-                       "CLOSEDCURLY"))
+;;;;;;
