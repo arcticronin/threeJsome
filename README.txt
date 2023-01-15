@@ -10,7 +10,7 @@ Sviluppo del codice:
 Per sviluppare il codice abbiamo preso come riferimento il libro "Compilers: Principles, Techniques, and Tools by Alfred Aho (Author), Jeffrey Ullman (Author), Ravi Sethi (Author), Monica Lam (Author)", quindi l'approccio utilizzato è top down.
 Per questo recursive descent parser siamo partiti identificando i membri più esterni e successivamente abbiamo analizzato quelli più interni.
 
-La struttura utilizzata è quella di creare innanzitutto dei tokens, identificabili: <TOKENTYPE "TOKENCONTENT"> oppure per token semplici, s, ad esempio le parentesi (si vedano le funzioni _____TODO____).
+La struttura utilizzata è quella di creare innanzitutto dei tokens, identificabili: <TOKENTYPE "TOKENCONTENT"> oppure per token semplici, s, ad esempio le parentesi (si vedano le funzioni sottostanti).
 Questa struttura viene chiamata dal parser (jsonparse/2) che che genera l'albero a parire dalla lista. 
 
 
@@ -42,7 +42,33 @@ jsondump/2: jsondump(JSON, FileName). Scrive l’oggetto JSON sul file FileName 
 
 Funzioni definite da noi per la realizzazione del progetto:
 
+tokens_jsonobj/2
+
+tokens_members_rest/3
+
+tokens_pair_rest/3
+
+tokens_value_res/3
+
+tokens_elements_rest/3,
+
+string_tokens/2
+
+codes_tokens/2: funzione base per trasformare da codice a token
+
+codes_number_/3
+
+collapse_whitespaces/2: rimuove tutti gli spazi bianchi
 
 
+Definizione di predicati:
+
+tokenizefile/1
+
+is_string_delimiter/1
+
+codes_stringtoken/1
+
+is_whitespace/1
 
 
