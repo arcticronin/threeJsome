@@ -13,7 +13,7 @@ Per questo recursive descent parser siamo partiti identificando i membri più es
 La struttura utilizzata è quella di creare innanzitutto dei tokens, identificabili: <TOKENTYPE "TOKENCONTENT"> oppure per token semplici, s, ad esempio le parentesi (si vedano le funzioni sottostanti).
 Questa struttura viene chiamata dal parser (jsonparse/2) che che genera l'albero a parire dalla lista. 
 
-
+--------------------------------------
 Funzioni definite nel file di consegna:
 
 jsonparse/2: jsonparse(JSONString, Object). Risulta vero se JSONString (una stringa SWI Prolog o un atomo Prolog) può venire
@@ -39,7 +39,7 @@ jsonread/2: jsonread(FileName, JSON). Apre il file FileName e ha successo se rie
 
 jsondump/2: jsondump(JSON, FileName). Scrive l’oggetto JSON sul file FileName in sintassi JSON. Se FileName non esiste, viene creato e se esiste viene sovrascritto. 
 
-
+-------------------------------
 Funzioni definite da noi per la realizzazione del progetto:
 
 tokens_jsonobj/2
@@ -60,7 +60,9 @@ codes_number_/3
 
 collapse_whitespaces/2: rimuove tutti gli spazi bianchi
 
+write_members/2
 
+-----------------------------------------------
 Definizione di predicati:
 
 tokenizefile/1
@@ -71,4 +73,25 @@ codes_stringtoken/1
 
 is_whitespace/1
 
+write_elements/2
 
+tab/2
+-------------------------------------
+Test utilizzati:
+
+test1(O, R):-
+    jsonparse('{"nome" : "Arthur", "cognome" : "Dent"}', O),
+    jsonaccess(O, ["nome"], R).
+
+test2(O, R):-
+    jsonparse('{"nome": "Arthur", "cognome": "Dent"}', O),
+    jsonaccess(O, "nome", R).
+
+test3(Z,R):-
+    jsonparse('{"nome" : "Zaphod",
+    "heads" : ["Head1", "Head2"]}', Z),
+    jsonaccess(Z, ["heads", 1], R).
+
+test4(R):-
+    jsonparse('{"nome" : "Arthur", "cognome" : "Dent"}', JSObj),
+    jsonaccess(JSObj, ["cognome"], R).
