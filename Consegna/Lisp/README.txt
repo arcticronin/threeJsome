@@ -5,10 +5,59 @@ Membri del Gruppo
 	851849 Montoli Matteo
 	859246 Zhou Chengjie 
 
+----------------------
 Sviluppo del codice:
 Per sviluppare il codice abbiamo preso come riferimento il libro "Compilers: Principles, Techniques, and Tools by Alfred Aho (Author), Jeffrey Ullman (Author), Ravi Sethi (Author), Monica Lam (Author)", quindi l'approccio utilizzato è top down.
 Per questo recursive descent parser siamo partiti identificando i membri più esterni e successivamente abbiamo analizzato quelli più interni.  
-Abbiamo defintio una funzione per ogni simbolo non terminale e abbiamo utilizzato la ricorsione per iterare sulla lista di token.
+La struttura utilizzata è quella di creare innanzitutto dei tokens, identificabili:
+
+<TOKENTYPE TOKENCONTENT>
+
+Per i tokens che hanno un contenuto: stringhe, numeri.
+
+Oppure
+
+<TOKENTYPE> per token semplici, come le parentesi. 
+
+Dalla lista di token usare una funzione parse che genera l'albero corrispondente a parire dalla
+lista.
+
+----------------------------
+Struttura particolare Lisp
+
+In lisp abbiamo scelto di procedere 
+come se avessimo una macchina a stati finiti
+con stack.
+
+Non potendo usare un proprio stack o iteratore ne' la funzione pop()
+perchè usano una set nella loro implementazione,
+usiamo una combinazione di funzione e ricorsione sulla lista di tokens.
+Ogni regola della grammatica è definita in una funzione, 
+e successivamente usiamo la ricorsione per seguire le regole di produzione.
+Infine andiamo sul giusto parser, che fa una sola
+cosa: parsare quella particolare sequenza per cui è programmato, e ritornare il
+resto dei tokens non parsati.
+
+La nostra macchina a stati finiti lavora quindi su pila vuota e non su uno stato
+finito.
+
+Gli stati sono i vari parser su cui la macchina si setta per cercare diversi patterns.
+
+Do one thing, but do it well.
+
+N.B.  file non sono stati divisi in moduli come è stato fatto per prolog, per comodità, essendo il sistema di moduli di lisp un po' più system dependent
+
+/*note:
+
+usando la funzione 
+
+parse-object(tokens)
+
+si ha in ritorno ->'(Jsonobj Rest)
+si potrebbe andare a vedere il JSON obj che viene parsato
+correttamente, e poi il rest.
+
+*/
 
 --------------------------------------
 Funzioni definite nel file di consegna:
@@ -122,3 +171,4 @@ senza il parser:
 con parser:
 (defparameter x (jsonparse "{\"nome\" : \"Arthur\", \"cognome\" : \"Dent\"}"))
 (defparameter z (jsonparse "{\"name\" : \"Zaphod\", \"heads\" : [[\"Head1\"], [\"Head2\"]]}"))
+
