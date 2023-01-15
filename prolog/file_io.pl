@@ -10,7 +10,6 @@ jsonread(FileName, Jobj):-
 jsondump(JSON, FileName) :-
     atom(FileName),
     open(FileName, write, Out),
-    %gtrace,
     jsondump_(JSON, Out),
     close(Out).
 
@@ -138,6 +137,9 @@ try(X):-
     jsonread('in.txt', X),
     %trace,
     jsondump(X, 'out.txt').
+
+
+
 
 %tab/2
 %tab(Int, String):-
