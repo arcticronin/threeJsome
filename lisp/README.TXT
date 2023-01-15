@@ -10,7 +10,7 @@ Per sviluppare il codice abbiamo preso come riferimento il libro "Compilers: Pri
 Per questo recursive descent parser siamo partiti identificando i membri più esterni e successivamente abbiamo analizzato quelli più interni.  
 Abbiamo defintio una funzione per ogni simbolo non terminale e abbiamo utilizzato la ricorsione per iterare sulla lista di token.
 
-
+--------------------------------------
 Funzioni definite nel file di consegna:
 
 jsonparse: accetta in ingresso una stringa e  risulta vero se JSONString (una stringa Lisp) può venire
@@ -36,7 +36,7 @@ jsonread: (jsonread filename).  Apre il file filename e ritorna un oggetto JSON 
 jsondump: (jsondump JSON filename). Scrive l’oggetto JSON sul file filename in sintassi JSON. Se filename
 non esiste, viene creato e se esiste viene sovrascritto.
 
-
+----------------------------
 Funzioni definite da noi:
 
 (defun parse-obj-members (token-list &optional acc)): funzione per il parser di obj e members con input la lista di token e l'accumulatore.
@@ -59,9 +59,7 @@ Funzioni definite da noi:
 
 (defun extract-value (value)): estrae valore
 
-
-
-
+----------------------------
 
 Funzioni per la gestione dei token:
 
@@ -83,6 +81,7 @@ Funzioni per la gestione dei token:
 
 (defun is-number-t (token))
 
+----------------------------------------
 Parameter definiti per testare le funzioni:
 
 (defparameter empty-json-object "{}")
@@ -116,7 +115,7 @@ SINTASSI ERRATA:
 (defparameter missing-column "{\"test\" 2}")
 
 
-ACCESS
+ACCESS:
 
 senza il parser:
 ;String
