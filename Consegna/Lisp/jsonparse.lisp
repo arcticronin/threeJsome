@@ -61,11 +61,6 @@
      (member char token-white-space))
    char-list))
 
-
-;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
-
-;; Lo chiamo quando incontro il carattere \"
-;;; Caso base : \" <- Se ritrovo i doppi apici so che sono alla fine di una stringa
 (defun parse-string (char-list &optional acc) 
   (let ((curr-char (first char-list))
         (list-rest (rest char-list)))
@@ -80,8 +75,6 @@
       )
 ))
 
-
-;;; Dato una lista di caratteri in input restituisce una numero in forma stringa
 (defun parse-number (char-list &optional acc ) 
   (let ((curr-char 
          (first char-list))
@@ -96,12 +89,6 @@
             (append acc nil)) 
                char-list)) 
     ))
-
-
-
-
-
-;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
 
 (defun tokenize-char-list (char-list &optional acc) 
   (let ((head-list 
