@@ -5,18 +5,32 @@
 (defparameter j '("OPENCURLY"
                  ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
                  ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
-                 ("string-token" "eta") "COLON" ("number-token" 19) "CLOSEDCURLY" ))
-(defparameter v '("OPENCURLY"
-                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))                 
+                 ("string-token" "eta") "COLON" ("number-token" 19) "CLOSEDCURLY"))
+
+(defparameter c '("OPENCURLY"
+                 ("string-token" "nome") "COLON" ("string-token" "JOE") "COMMA"  ("string-token" "cognome") "COLON" ("string-token" "Dent") "CLOSEDCURLY" ))                 
+
+
+(defparameter pino '("OPENCURLY"
+                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
+                 ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
+                 ("string-token" "eta") "COLON" ("number-token" 19) "COMMA" ("string-token" "nested") "COLON" "OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" "CLOSEDCURLY"))
+
+
+
 
 
 (defparameter compound-tokens '("string-token" "number-token"))
 (defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
+(defparameter valid-value-brackets '("OPENCURLY" "OPENBRACKET"))
 ;;
 (defparameter emptytok '("OPENCURLY" "CLOSEDCURLY"))
 ;; (parser(tokens) -> ( ( rest-of-tokens ) ( parsedvalue )) )
 ;;
 (defparameter val '(("string-token" ciao) "CLOSEDBRACKET"))
+
+(defparameter json-object-type 'jsonobj)
+(defparameter json-array-type 'jsonarray)
 
 ;; KEY:
 ;; do one thing and do it well
@@ -46,6 +60,160 @@
 
 
 
+
+
+(defparameter v '("OPENCURLY"
+                 ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" ))   
+
+;;; "OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" 
+(defun json-parse-2 (tokens) 
+  (let ((head (first tokens)) 
+        (tail (rest tokens))
+        (last-element (car (last tokens))))  
+      (cond ((and (is-openc-t head) (is-closedc-t last-element))
+             (append (list json-object-type) (parse-obj-members (clean-list-to-parse tail)))) 
+            ((and (is-openb-t head) (is-closedb-t last-element))
+              (list json-object-type 
+                    (parse-array-2
+                      (clean-list-to-parse tail)))) 
+            (T (error "MALFORMED OBJEECT -1")))))
+
+
+;;;("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" 
+;;; CONTINUO FINCHÈ NON TROVO CLOSED CURLY.
+;;; DOPO OGNI COMPOUND HO SIMPLE E DOPO OGNI SIMPLE HO COMPOUND
+
+ ;;;("string-token" "nome") "COLON" ("string-token" "Arthur") 
+;;;("OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA" ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA" 
+;;;("string-token" "nestato") "COLON" "OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "pino") ("string-token" "cognome:") ("string-token" "joe") "CLOSEDCURLY" "CLOSEDCURLY")
+
+(defun parse-obj-members (token-list &optional acc) 
+  (let ((head (first token-list)) 
+        (tail (rest token-list)))
+    (if (null token-list) 
+              (append acc token-list)
+              ;;FIRST CASE -> ",a" <- THIS CASE
+        (cond ((and (is-comma-t head) 
+                    (null acc)) 
+                      (error "MALFORMED OBJECT -2"))
+              ;;SECOND CASE -> "A:B,"
+              ((trailing-comma head tail) 
+                (error "TRAILING COMMA"))
+              
+              (T 
+                  ;;; PARSED-KEY-VAL È di questo tipo -> (CIAO MOTO) (REST TO ANALYZE)
+                (let ((parsed-key-val (parse-key-value (if (is-comma-t head) tail token-list ) ))) 
+                (parse-obj-members (cadr parsed-key-val) (append acc (list (car parsed-key-val))))))
+        )
+    ) 
+))
+
+;;; RETURNS (KEY PAIR) ( LIST TO RECURSE)
+(defun parse-key-value (token-list) 
+  (let ((key (first token-list)) 
+        (colon (second token-list))
+        (value (third token-list))
+        (tail-list (subseq token-list 3)))
+      (if (is-valid-triplet key colon value)
+          (if (is-simple-value value) 
+              (list (list (extract-value key) (extract-value value)) tail-list)
+          (let ((complex-value-pair (parse-complex-value tail-list value))) 
+            (list (list (extract-value key) (first complex-value-pair))
+                   (cadr complex-value-pair))))
+
+
+        (error "PORCO DIO")
+        )
+        ))
+
+(defun is-valid-triplet (first-el second-el third-el) 
+  (and  (is-string-t first-el) 
+        (is-colon-t second-el) 
+        (or (is-string-t third-el) 
+            (is-number-t third-el)
+            (is-openc-t  third-el)
+            (is-openb-t third-el)
+            )))
+
+
+
+;;; CHECKS IF VALUE IS A STRING OR NUMBER
+(defun is-simple-value (value) 
+  (or (is-string-t value) 
+      (is-number-t value))
+  )
+
+
+;;; PARSES ARRAY OR OBJECT
+;;; parenthesis -> Equivale se la parentesi è [ o {
+;;; TOKEN-LIST parte gia da dopo la parentesi
+(defun parse-complex-value (token-list parenthesis) 
+  (if (is-openc-t parenthesis) 
+        (parse-object-value token-list)
+         (error "TODO IMPLEMENT PARSE-ARR")
+          )
+  )
+
+(defun parse-object-value (tokens &optional acc) 
+  (let ((head (first tokens)) 
+    (tail (rest tokens))) 
+    (if (is-closedc-t head)
+        ;;Base case 
+        (list 
+          (append (list json-object-type) 
+              (parse-obj-members (append acc nil)))
+           tail
+           )
+        ;;;RECURSIVE
+        (parse-object-value tail 
+      (append acc (list head)))))
+)
+(defun parse-array-2 (token-list &optional acc) 
+  ())
+
+
+
+
+
+;;; Given a token list removes the last bracke in order to work only on members
+(defun clean-list-to-parse (token-list) 
+      (remove-last token-list))
+
+(defun remove-last (l)
+    (reverse (rest (reverse l))))
+
+
+(defun trailing-comma (element next) 
+  (and (is-comma-t element) (null next)))
+
+(defun extract-value (value) 
+  (cadr value))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;INIZIO LUCA
 ;; funzione che viene chiamata per prima. prende il risultato di tutto
 ;; poi dovrò controllare che rest sia vuoto e così l'oggetto è ben formato
 (defun json-parse (tokens)
@@ -55,7 +223,6 @@
           (rest-tokens (second o-r)))
      (list obj rest-tokens))
   )
-
 
 ;; > sposta check su, solo obj
 (defun parse-obj (tokens) ;; --> object rest
@@ -254,19 +421,19 @@
 
 
 
-(defun jsonaccess (json &rest args)
-      (jsonaccess_ json args))
+; (defun jsonaccess (json &rest args)
+;       (jsonaccess_ json args))
 
-(defun jsonaccess (json x)
-  (if (stringp x)
-      (jsonaccess_ json (list x))
-      (jsonaccess_ json x)))
+; (defun jsonaccess (json x)
+;   (if (stringp x)
+;       (jsonaccess_ json (list x))
+;       (jsonaccess_ json x)))
 
-(defun string-to-list (x)
-  (if (stringp x)
-      (list x)
-      x)
-  )
+; (defun string-to-list (x)
+;   (if (stringp x)
+;       (list x)
+;       x)
+;   )
 
-(defun xx (&rest y)
-  y)
+; (defun xx (&rest y)
+;   y)
