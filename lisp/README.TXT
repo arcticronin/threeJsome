@@ -1,9 +1,9 @@
 ----jsonparse.lisp---- 
 
 Membri del Gruppo
-	[] Manzi Luca 
+	856095 Manzi Luca 
 	851849 Montoli Matteo
-	[] Zhou Chengjie 
+	859246 Zhou Chengjie 
 
 Sviluppo del codice:
 Per sviluppare il codice abbiamo preso come riferimento il libro "Compilers: Principles, Techniques, and Tools by Alfred Aho (Author), Jeffrey Ullman (Author), Ravi Sethi (Author), Monica Lam (Author)", quindi l'approccio utilizzato è top down.
