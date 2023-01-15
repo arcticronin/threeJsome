@@ -1,24 +1,31 @@
-:- use_module(parser).
+:- module(file_io, [jsonread/2, jsondump/2]).
 
-json_write(JSON, FileName) :-
+% input
+%jsonread/2
+jsonread(FileName, Jobj):-
+    read_file_to_string(FileName, S, []),
+    jsonparse(S, Jobj).
+
+%jsondump/2
+jsondump(JSON, FileName) :-
     atom(FileName),
     open(FileName, write, Out),
     %gtrace,
-    write_JSON(JSON, Out),
+    jsondump_(JSON, Out),
     close(Out).
 
 % Write json in a file definition:
 % write_json/2
 
 % Case in which there is a json_obj
-write_JSON(jsonobj(Members), Out) :-
+jsondump_(jsonobj(Members), Out) :-
     !,
     write(Out, "{"),
     write_members(Members, Out),
     write(Out, '}').
 
 % Case in which there is a json_array
-write_JSON(jsonarray(Elements), Out) :-
+jsondump_(jsonarray(Elements), Out) :-
     !,
     write(Out, '['),
     write_elements(Elements, Out),
@@ -57,7 +64,7 @@ write_members([(Chiave, jsonobj(Members))], Out) :-
     !,
     writeq(Out, Chiave),
     write(Out, " : "),
-    write_JSON(jsonobj(Members), Out).
+    jsondump_(jsonobj(Members), Out).
 
 % Recursive case -> string : json_Obj
 write_members([(Chiave, jsonobj(Members)) | Members1], Out) :-
@@ -65,7 +72,7 @@ write_members([(Chiave, jsonobj(Members)) | Members1], Out) :-
     !,
     writeq(Out, Chiave),
     write(Out, " : "),
-    write_JSON(jsonobj(Members), Out),
+    jsondump_(jsonobj(Members), Out),
     write(Out, ', '),
     write_members(Members1, Out).
 
@@ -75,7 +82,7 @@ write_members([(Chiave, jsonarray(Elements))], Out) :-
     !,
     writeq(Out, Chiave),
     write(Out, " : "),
-    write_JSON(jsonarray(Elements), Out).
+    jsondump_(jsonarray(Elements), Out).
 
 % Recursive case -> more than just a member
 write_members([(Chiave, Valore) | Members], Out) :-
@@ -107,12 +114,12 @@ write_elements([Element], Out) :-
 % Base case: element is a json_obj
 write_elements([json_obj(Members)], Out) :-
     !,
-    write_JSON(json_obj(Members), Out).
+    jsondump_(json_obj(Members), Out).
 
 % Base case: element is a json_array
 write_elements([json_array(Elements)], Out) :-
     !,
-    write_JSON(json_array(Elements), Out).
+    jsondump_(json_array(Elements), Out).
 
 % Recursive case: more than just an element
 write_elements([Element | Elements], Out) :-
@@ -130,7 +137,7 @@ r:-
 try(X):-
     jsonread('in.txt', X),
     %trace,
-    json_write(X, 'out.txt').
+    jsondump(X, 'out.txt').
 
 %tab/2
 %tab(Int, String):-

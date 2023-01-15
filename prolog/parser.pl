@@ -1,15 +1,10 @@
-:- module(parser, [jsonparse/2, jsonaccess/3, jsonread/2]).
+:- module(parser, [jsonparse/2, jsonaccess/3]).
 :- use_module(tokenizer).
 
 %jsonparse/2
 jsonparse(S, O):-
     string_tokens(S, T),
     tokens_jsonobj(T, O).
-
-%jsonread/2
-jsonread(FileName, Jobj):-
-    read_file_to_string(FileName, S, []),
-    jsonparse(S, Jobj).
 
 %tokens_jsonobj/2
 tokens_jsonobj([C|Cs], jsonobj(S)):-

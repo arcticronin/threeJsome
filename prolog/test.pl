@@ -2,15 +2,9 @@
 :- use_module(parser).
 :- use_module(file_io).
 
-%% from tokenizer, everything is private except
-%% string_tokens, useful here for debug too.
 
-semi(T):-
-    jsonparse('{"nome" : "Arthur", "cognome" : "Dent"}',X),
-    X = jsonobj([("nome", T)|_]).
 
-r:-
-    [jsonparse].
+
 
 test1(O, R):-
     jsonparse('{"nome" : "Arthur", "cognome" : "Dent"}', O),

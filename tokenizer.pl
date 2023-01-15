@@ -143,8 +143,8 @@ codes_tokens([C|Cs], [string(T)|Ts]):-
     C = 34,
     !,
     codes_stringtoken_(Cs, S, Rest),
-    atom_codes(T , S),
-
+    string_codes(T , S),
+    %%atom_codes(T , S),
     codes_tokens(Rest, Ts).
 
 
