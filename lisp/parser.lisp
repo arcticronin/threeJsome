@@ -47,8 +47,9 @@
   ("string-token" "eta") "COLON" ("number-token" 10) "CLOSEDCURLY" "CLOSEDBRACKET"))
 
 (defparameter arr-nested-arr 
-'("OPENBRACKET" "OPENBRACKET" ("number-token" 1) "COMMA" ("string-token" "gino") 
-"COMMA" "OPENBRACKET" ("string-token" "gino") "CLOSEDBRACKET" "CLOSEDBRACKET" "CLOSEDBRACKET"))
+'("OPENBRACKET" "OPENBRACKET" ("number-token" 1) "COMMA" ("string-token" "gino") "COMMA" "OPENBRACKET" 
+("number-token" 1) "COMMA" "OPENBRACKET" "CLOSEDBRACKET"
+"CLOSEDBRACKET" "CLOSEDBRACKET" "CLOSEDBRACKET"))
 
 
 (defparameter valid-value-brackets '("OPENCURLY" "OPENBRACKET"))
@@ -225,25 +226,41 @@
 (defun parse-array-value (tokens &optional acc) 
   (let ((head (first tokens)) 
         (tail (rest tokens))) 
-    (if (is-closedb-t head)
-        ;;Base case 
-        (list (append (list json-array-type) 
-                      (parse-array (append acc
-                                             nil)))
-              tail)
-      ;;;RECURSIVE
-      (parse-array-value tail 
-                          (append acc 
-                                  (list head)))))
-)
+    (cond ((is-closedb-t head) 
+          (list (append (list json-array-type) (parse-array (append acc nil))) tail)
+          )
 
+          ((or (is-openb-t head) (is-openc-t head)) 
+            (let ((complex-value (parse-complex-value
+                          tail
+                          head)))
+                (parse-array-value (cadr complex-value) (append acc (list (car complex-value))) 
+                )
+              )
+          )
 
+          (T (parse-array-value tail (append acc (list head))))
+
+    )
+))
+ 
+    ; (if (is-closedb-t head)
+    ;     ;;Base case 
+    ;     (list (append (list json-array-type) 
+    ;                   (parse-array (append acc
+    ;                                          nil)))
+    ;           tail)
+    ;   ;;;RECURSIVE
+    ;   (parse-array-value tail 
+    ;                       (append acc 
+    ;                               (list head))))
 (defun parse-array (token-list &optional acc) 
   (let ((head (first token-list)) 
         (tail (rest token-list)))
     (if (null token-list) 
         (append acc token-list)
-  (cond        
+  (cond
+            
    ((and (is-comma-t head) 
          (null acc)) 
     (error "MALFORMED OBJECT -2"))
@@ -271,7 +288,10 @@
   
   
 (defun parse-array-simple-value (value)
-  (cond ((is-simple-value value) (extract-value value))
+  (cond 
+        ((is-formed-obj value) value)
+        ((is-simple-value value) 
+        (extract-value value))
         (T (error "MALFORMED ARRAY"))
         ))
 
@@ -306,6 +326,7 @@
       (eq (length token) 2)
       (find (first token) compound-tokens :test #'string=))
      (first token))
+     ((is-formed-obj token) (first token))
     ( T
      (and (write token)
           (error "cannot infer token type"))
