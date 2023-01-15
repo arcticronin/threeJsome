@@ -22,6 +22,23 @@
                  ("string-token" "eta") "COLON" ("number-token" 19) "COMMA" 
                  ("string-token" "nested") "COLON" "OPENBRACKET" ("string-token" "vino") "CLOSEDBRACKET" "CLOSEDCURLY"))
 
+(defparameter pino-3 '("OPENCURLY"
+                 ("string-token" "Nest 1") "COLON"  
+                 "OPENCURLY" 
+                 ("string-token" "Nest 2") "COLON"
+                 "OPENCURLY"
+                ("string-token" "eta") "COLON" ("number-token" 19)
+                "COMMA"
+                ("string-token" "Nest 3")  "COLON"
+                 "OPENCURLY" 
+                   ("string-token" "eta") "COLON" ("number-token" 19)
+                   "COMMA"
+                    ("string-token" "cognome") "COLON" ("string-token" "Dent")
+                "CLOSEDCURLY"
+                 "CLOSEDCURLY"
+                 "CLOSEDCURLY"
+               "CLOSEDCURLY"))
+
 (defparameter empty-arr '("OPENBRACKET" "CLOSEDBRACKET"))
 
 (defparameter arr-simple '("OPENBRACKET" ("number-token" 10) "COMMA" ("string-token" "Arthur") ("string-token" "JOE") "CLOSEDBRACKET"))
@@ -29,7 +46,9 @@
 (defparameter arr-nested-obj '("OPENBRACKET" ("number-token" 10) "COMMA" ("string-token" "Arthur") "OPENCURLY"("string-token" "neste nest") "COLON" ("string-token" "Arthur") "COMMA" 
   ("string-token" "eta") "COLON" ("number-token" 10) "CLOSEDCURLY" "CLOSEDBRACKET"))
 
-(defparameter arr-nested-arr '("OPENBRACKET" "OPENBRACKET" ("number-token" 1) "COMMA" ("string-token" "gino") "CLOSEDBRACKET" "CLOSEDBRACKET"))
+(defparameter arr-nested-arr 
+'("OPENBRACKET" "OPENBRACKET" ("number-token" 1) "COMMA" ("string-token" "gino") 
+"COMMA" "OPENBRACKET" ("string-token" "gino") "CLOSEDBRACKET" "CLOSEDBRACKET" "CLOSEDBRACKET"))
 
 
 (defparameter valid-value-brackets '("OPENCURLY" "OPENBRACKET"))
@@ -104,7 +123,7 @@
       ) 
 ))
 
- ;;; TODO provare a mterre cddr e non subseq
+;;("PRENDE UNA TRIPLA")
 (defun parse-key-value (token-list) 
   (let ((key (first token-list)) 
         (colon (second token-list))
@@ -115,7 +134,10 @@
                                   colon
                                   value)) 
            (error "MALFORMED OBJECT"))
-
+          ((is-formed-obj value) 
+          (pair-return-structure (extract-value key)
+                                  value 
+                                  tail-list))
           ((is-simple-value value) 
            (pair-return-structure (extract-value key)
                                   (extract-value value) 
@@ -141,13 +163,21 @@
 (defun is-valid-triplet (first-el second-el third-el) 
   (and (is-string-t first-el) 
        (is-colon-t second-el) 
-       (or (is-string-t third-el) 
-           (is-number-t third-el)
-           (is-openc-t  third-el)
-           (is-openb-t third-el)
-           )))
+       (or  (is-formed-obj third-el)
+            (is-string-t third-el) 
+            (is-number-t third-el)
+            (is-openc-t  third-el)
+            (is-openb-t third-el)
+)))
 
-
+(defun is-formed-obj (value)
+  (and (eql (type-of value) 
+            'cons) 
+       (or (eql (car value)
+                json-object-type) 
+           (eql (car value) 
+                json-array-type)))
+  )
 
 ;;; CHECKS IF VALUE IS A STRING OR NUMBER
 (defun is-simple-value (value) 
@@ -162,21 +192,34 @@
     (parse-array-value token-list))
   )
 
-;;;"  ("string-token" "nome") "COLON" ("string-token" "Arthur") "
+
 (defun parse-object-value (tokens &optional acc) 
   (let ((head (first tokens)) 
         (tail (rest tokens))) 
-    (if (is-closedc-t head)
+
+  (cond ((is-closedc-t head)
         ;;Base case 
         (list (append (list json-object-type) 
                       (parse-obj-members (append acc
                                                  nil)))
               tail
-              )
-      ;;;RECURSIVE
-      (parse-object-value tail 
-                          (append acc 
-                                  (list head)))))
+              ))
+        ((or (is-openc-t head) (is-openb-t head))
+         (let ((complex-value 
+                (parse-complex-value tail
+                                     head)))
+           (parse-object-value (cadr complex-value) 
+                               (append acc
+                                       (list (car complex-value)))) 
+           ))
+        
+        (T (parse-object-value tail 
+                               (append acc 
+                                       (list head))))
+        
+    )
+  
+    )
 )
 
 (defun parse-array-value (tokens &optional acc) 
@@ -310,5 +353,3 @@
   )
 
 ;;
-
-
