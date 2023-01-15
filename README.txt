@@ -1,9 +1,9 @@
 ----jsonparse.pl---- 
 
 Membri del Gruppo
-	[] Manzi Luca 
+	856095 Manzi Luca 
 	851849 Montoli Matteo
-	[] Zhou Chengjie 
+	859246 Zhou Chengjie 
 
 
 Sviluppo del codice:
