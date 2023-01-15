@@ -14,7 +14,8 @@
 (defparameter pino '("OPENCURLY"
                  ("string-token" "nome") "COLON" ("string-token" "Arthur") "COMMA"
                  ("string-token" "cognome") "COLON" ("string-token" "Dent") "COMMA"
-                 ("string-token" "eta") "COLON" ("number-token" 19) "COMMA" ("string-token" "nested") "COLON" "OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" "CLOSEDCURLY"))
+                 ("string-token" "eta") "COLON" ("number-token" 19) "COMMA" 
+                 ("string-token" "nested") "COLON" "OPENCURLY" ("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" "CLOSEDCURLY"))
 
 
 
@@ -69,14 +70,21 @@
 (defun json-parse-2 (tokens) 
   (let ((head (first tokens)) 
         (tail (rest tokens))
-        (last-element (car (last tokens))))  
-      (cond ((and (is-openc-t head) (is-closedc-t last-element))
-             (append (list json-object-type) (parse-obj-members (clean-list-to-parse tail)))) 
-            ((and (is-openb-t head) (is-closedb-t last-element))
-              (list json-object-type 
-                    (parse-array-2
-                      (clean-list-to-parse tail)))) 
-            (T (error "MALFORMED OBJEECT -1")))))
+        (last-element (car 
+                       (last tokens)))) 
+ 
+    (cond ((and (is-openc-t head) 
+                (is-closedc-t last-element))
+           (append (list json-object-type) 
+                   (parse-obj-members 
+                    (clean-list-to-parse tail))))
+ 
+          ((and (is-openb-t head) 
+                (is-closedb-t last-element))
+           (list json-object-type 
+                 (parse-array-2
+                  (clean-list-to-parse tail)))) 
+          (T (error "MALFORMED OBJEECT -1")))))
 
 
 ;;;("string-token" "nome") "COLON" ("string-token" "Arthur") "CLOSEDCURLY" 
@@ -91,21 +99,36 @@
   (let ((head (first token-list)) 
         (tail (rest token-list)))
     (if (null token-list) 
-              (append acc token-list)
-              ;;FIRST CASE -> ",a" <- THIS CASE
-        (cond ((and (is-comma-t head) 
-                    (null acc)) 
-                      (error "MALFORMED OBJECT -2"))
-              ;;SECOND CASE -> "A:B,"
-              ((trailing-comma head tail) 
-                (error "TRAILING COMMA"))
+        (append acc 
+                token-list)
+     ;;;ELSE
+      (cond 
+       ((and (is-string-t head)
+             (null acc)) 
+        (let ((parsed-key-val 
+               (parse-key-value token-list)))
+          (parse-obj-members 
+           (cadr parsed-key-val) 
+           (append acc 
+                   (list (car parsed-key-val))))))
+       ;;;FIRST CASE -> ",A"
+       ((and (is-comma-t head) 
+             (null acc)) 
+        (error "MALFORMED OBJECT -2"))
+       ;;SECOND CASE -> "A:B,"
+       ((trailing-comma head tail) 
+        (error "TRAILING COMMA"))
               
-              (T 
-                  ;;; PARSED-KEY-VAL È di questo tipo -> (CIAO MOTO) (REST TO ANALYZE)
-                (let ((parsed-key-val (parse-key-value (if (is-comma-t head) tail token-list ) ))) 
-                (parse-obj-members (cadr parsed-key-val) (append acc (list (car parsed-key-val))))))
-        )
-    ) 
+       (T 
+        ;;; PARSED-KEY-VAL È di questo tipo -> (CIAO MOTO) (REST TO ANALYZE)
+        (let ((parsed-key-val 
+               (parse-key-value tail)))
+          (parse-obj-members 
+           (cadr parsed-key-val) 
+           (append acc
+                   (list (car parsed-key-val))))))
+       )
+      ) 
 ))
 
 ;;; RETURNS (KEY PAIR) ( LIST TO RECURSE)
@@ -114,26 +137,40 @@
         (colon (second token-list))
         (value (third token-list))
         (tail-list (subseq token-list 3)))
-      (if (is-valid-triplet key colon value)
-          (if (is-simple-value value) 
-              (list (list (extract-value key) (extract-value value)) tail-list)
-          (let ((complex-value-pair (parse-complex-value tail-list value))) 
-            (list (list (extract-value key) (first complex-value-pair))
-                   (cadr complex-value-pair))))
+
+    (cond ((not (is-valid-triplet key 
+                                  colon
+                                  value)) 
+           (error "MALFORMED OBJECT"))
+
+          ((is-simple-value value) 
+           (pair-return-structure (extract-value key)
+                                  (extract-value value) 
+                                  tail-list)
+           )
+          (T (let ((complex-value (parse-complex-value
+                                   tail-list value))) 
+               (pair-return-structure (extract-value key) 
+                                      (first complex-value) 
+                                      (cadr complex-value))
+               )
+             )
+          )
 
 
-        (error "PORCO DIO")
-        )
-        ))
+(defun pair-return-structure (key value list-to-analyze) 
+  (list (list key value) 
+        list-to-analyze))
+
 
 (defun is-valid-triplet (first-el second-el third-el) 
-  (and  (is-string-t first-el) 
-        (is-colon-t second-el) 
-        (or (is-string-t third-el) 
-            (is-number-t third-el)
-            (is-openc-t  third-el)
-            (is-openb-t third-el)
-            )))
+  (and (is-string-t first-el) 
+       (is-colon-t second-el) 
+       (or (is-string-t third-el) 
+           (is-number-t third-el)
+           (is-openc-t  third-el)
+           (is-openb-t third-el)
+           )))
 
 
 
@@ -156,58 +193,66 @@
 
 (defun parse-object-value (tokens &optional acc) 
   (let ((head (first tokens)) 
-    (tail (rest tokens))) 
+        (tail (rest tokens))) 
     (if (is-closedc-t head)
         ;;Base case 
-        (list 
-          (append (list json-object-type) 
-              (parse-obj-members (append acc nil)))
-           tail
-           )
-        ;;;RECURSIVE
-        (parse-object-value tail 
-      (append acc (list head)))))
+        (list (append (list json-object-type) 
+                      (parse-obj-members (append acc
+                                                 nil)))
+              tail
+              )
+      ;;;RECURSIVE
+      (parse-object-value tail 
+                          (append acc 
+                                  (list head)))))
 )
+
+;;; FARE ARRAY
+;;; FARE SOLO PARSE VALUE
+;;; [a,b c,d d,]
 (defun parse-array-2 (token-list &optional acc) 
-  ())
-
-
+    (let ((head (first token-list)) 
+          (tail (rest token-list)))
+        (if (null token-list) 
+            (append acc token-list)
+          (cond ((and (is-comma-t head) 
+                    (null acc)) 
+                      (error "MALFORMED OBJECT -2"))
+              ;;SECOND CASE -> "A:B,"
+              ((trailing-comma head tail) 
+                (error "TRAILING COMMA"))
+              
+              (T )
+                )
+        )
+        )
+        
+        )
+  
+  
+(defun parse-array-value (value) 
+  (if (is-simple-value value) 
+      (extract-value value)
+    ()
+    )
+  )
 
 
 
 ;;; Given a token list removes the last bracke in order to work only on members
 (defun clean-list-to-parse (token-list) 
-      (remove-last token-list))
+  (remove-last token-list))
 
 (defun remove-last (l)
-    (reverse (rest (reverse l))))
+  (reverse (rest (reverse l))))
 
 
 (defun trailing-comma (element next) 
-  (and (is-comma-t element) (null next)))
+  (and (is-comma-t element)
+       (null next)))
 
 (defun extract-value (value) 
   (cadr value))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
