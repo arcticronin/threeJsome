@@ -22,3 +22,8 @@
                           (t (error "not a JSON object or array or not appropriate key" obj cur-key)))))
       (jsonaccess-from-list current (rest fields))))) 
 
+;chiamata corretta
+(defun j (obj &rest fields)
+  (jsonaccess-from-list obj fields)
+)
+
