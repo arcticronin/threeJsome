@@ -9,9 +9,31 @@ Membri del Gruppo
 Sviluppo del codice:
 Per sviluppare il codice abbiamo preso come riferimento il libro "Compilers: Principles, Techniques, and Tools by Alfred Aho (Author), Jeffrey Ullman (Author), Ravi Sethi (Author), Monica Lam (Author)", quindi l'approccio utilizzato è top down.
 Per questo recursive descent parser siamo partiti identificando i membri più esterni e successivamente abbiamo analizzato quelli più interni.
+Per sviluppare il codice abbiamo preso come riferimento il libro "Compilers: Principles, Techniques, and Tools by Alfred Aho (Author), Jeffrey Ullman (Author), Ravi Sethi (Author), Monica Lam (Author)", quindi l'approccio utilizzato è top down.
+Per questo recursive descent parser siamo partiti identificando i membri più esterni e successivamente abbiamo analizzato quelli più interni.  
+La struttura utilizzata è quella di creare innanzitutto dei tokens, identificabili:
 
-La struttura utilizzata è quella di creare innanzitutto dei tokens, identificabili: <TOKENTYPE "TOKENCONTENT"> oppure per token semplici, s, ad esempio le parentesi (si vedano le funzioni sottostanti).
-Questa struttura viene chiamata dal parser (jsonparse/2) che che genera l'albero a parire dalla lista. 
+<TOKENTYPE TOKENCONTENT>
+
+Per i tokens che hanno un contenuto: stringhe, numeri.
+
+Oppure
+
+<TOKENTYPE> per token semplici, come le parentesi. 
+
+Dalla lista di token usare una funzione parse che genera l'albero corrispondente a parire dalla
+lista.
+
+NOTE:
+
+I numeri in prolog sono stati implementati a mano: Legge solo interi.
+
+ è stato scelto di non usare un parsenumber, ma poteva essere stata anche fatta allo stesso modo del predicato string: raggruppare i caratteri a partire dai segni e poi chiamare un parsenumber(S N)
+
+un predicato tab(I, String)
+è stato creato per tabulare l'output, però è stato rimosso in quanto, su ricerche sulla giusta tabulazione di una stringa json, è venuto fuori che è stata ideata per essere più compatta possibile. 
+
+Il jsonaccess non ha ! per provare a trovare più di un match.
 
 --------------------------------------
 Funzioni definite nel file di consegna:
