@@ -30,6 +30,12 @@ jsonaccess: che accetta un oggetto JSON (in particolare un jsonobj e un jsonarra
 “campi” (denominati fields) che recupera l’oggetto corrispondente. Un campo rappresentato da N (con N un numero
 maggiore o uguale a 0) rappresenta un indice di un array JSON.
 
+jsonread: apre il file filename e ritorna un oggetto JSON (o genera un errore).
+
+jsondump: scrive l’oggetto JSON sul file filename in sintassi JSON. Se filename
+non esiste, viene creato e se esiste viene sovrascritto.
+
+
 Funzioni definite da noi per la realizzazione del progetto:
 
 
