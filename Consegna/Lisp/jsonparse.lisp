@@ -266,7 +266,7 @@
      (member char token-white-space))
    char-list))
 
-(defun parse-string (char-list &optional acc) 
+(defun parse-string-token (char-list &optional acc) 
   (let ((curr-char (first char-list))
         (list-rest (rest char-list)))
     (if (eql curr-char #\") 
@@ -274,13 +274,13 @@
          (char-list-to-string 
           (append acc  nil)) 
          list-rest)
-      (parse-string list-rest 
+      (parse-string-token list-rest 
                     (append acc
                             (list curr-char)))
       )
 ))
 
-(defun parse-number (char-list &optional acc ) 
+(defun parse-number-token (char-list &optional acc ) 
   (let ((curr-char 
          (first char-list))
         (rest-list 
@@ -288,7 +288,7 @@
 
     (if (or (member curr-char digits) 
       (eql curr-char #\.)) 
-        (parse-number rest-list 
+        (parse-number-token rest-list 
           (append acc (list curr-char))) 
           (list (char-list-to-string 
             (append acc nil)) 
@@ -323,7 +323,7 @@
             ;;;TOKENIZE STRING
             ((eql head-list #\") 
              (let ((parsed-string-data 
-                    (parse-string tail-list)))
+                    (parse-string-token tail-list)))
           (tokenize-char-list (cadr
                       parsed-string-data)             
           (append acc 
@@ -337,9 +337,9 @@
                    full-number-symbols) 
            (let ((parsed-number-data
                   (if (eql head-list #\-) 
-                      (parse-number tail-list 
+                      (parse-number-token tail-list 
                                     (list #\-)) 
-                    (parse-number char-list))))
+                    (parse-number-token char-list))))
              (tokenize-char-list 
               (cadr parsed-number-data) 
               (append acc 
