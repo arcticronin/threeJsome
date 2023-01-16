@@ -1,40 +1,12 @@
-;;; Membri del Gruppo
-;;; 856095 Manzi Luca 
-;;; 851849 Montoli Matteo
-;;; 859246 Zhou Chengjie
-
-;;; -*- Mode: Lisp -*-
-
-;;; begin-of-file jsonparsing.lisp
-
-
-(defparameter curly-brackets '(#\{ #\}))
-(defparameter squared-brackets '(#\[ #\]))
-(defparameter brackets (append curly-brackets squared-brackets))
-(defparameter spaces '(#\Space #\Newline #\Tab))
-(defparameter apix '(#\" #\'))
-(defparameter token-column (list "COLON"))
-(defparameter token-comma (list "COMMA"))
-(defparameter token-white-space (list "WHITESPACE"))
-(defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
-
-(defparameter symbols '(#\-))
-(defparameter full-number-symbols (append digits symbols))
-
 (defparameter compound-tokens '("string-token" "number-token"))
-(defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" 
-                              "CLOSEDBRACKET" "COMMA" "COLON"))
-
-
-;;; BEGIN PARSER
+(defparameter simple-tokens '("OPENCURLY" "CLOSEDCURLY" "OPENBRACKET" "CLOSEDBRACKET" "COMMA" "COLON"))
+(defparameter emptytok '("OPENCURLY" "CLOSEDCURLY"))
+(defparameter val '(("string-token" "ciao") "CLOSEDBRACKET"))
+(defparameter emptytok2 '("OPENBRACKET" ("string-token" "uno") ("number-token" 2) "CLOSEDBRACKET"))
 
 ;;
 ;;     PARSER
 ;;
-
-(defun jsonparse (string)
-  (jsonparse-tokens (tokenize string))
-)
 
 (defun jsonparse-tokens (tokens)
   (let
@@ -226,158 +198,10 @@
    "number-token")
   )
 
+;;;;;;
+; IO
+;;;;;;
 
-;;; END PARSER
-
-;;;BEGIN TOKENIZER
-(defun tokenize (string)
-  (remove-white-spaces-token 
-   (tokenize-char-list 
-    (string-to-list string))) 
-)
- 
-;;;; Given a string returns an array of characters
-(defun string-to-list (json-string)
-    (coerce 
-     json-string 
-     'list))
-
-(defun char-list-to-string (char-list) 
-  (coerce char-list 'string))
-
-
-
-(defun string-to-number (string)
-   (if (null (find #\. string))
-      (parse-integer string)
-
-     (cond ((null 
-             (float-integrity string)) 
-             (error "MALFORMED FLOAT"))     
-           (T (parse-float string)))))     
-
-(defun float-integrity (string-number) 
-(eql (count #\. string-number) 1))
-
-
-
-(defun remove-white-spaces-token (char-list) 
-  (remove-if
-   (lambda (char)
-     (member char token-white-space))
-   char-list))
-
-(defun parse-string-token (char-list &optional acc) 
-  (let ((curr-char (first char-list))
-        (list-rest (rest char-list)))
-    (if (eql curr-char #\") 
-        (list 
-         (char-list-to-string 
-          (append acc  nil)) 
-         list-rest)
-      (parse-string-token list-rest 
-                    (append acc
-                            (list curr-char)))
-      )
-))
-
-(defun parse-number-token (char-list &optional acc ) 
-  (let ((curr-char 
-         (first char-list))
-        (rest-list 
-         (rest char-list)))
-
-    (if (or (member curr-char digits) 
-      (eql curr-char #\.)) 
-        (parse-number-token rest-list 
-          (append acc (list curr-char))) 
-          (list (char-list-to-string 
-            (append acc nil)) 
-               char-list)) 
-    ))
-
-(defun tokenize-char-list (char-list &optional acc) 
-  (let ((head-list 
-         (first char-list)) 
-        (tail-list 
-         (rest char-list)))
- 
-    (if (null char-list)
-        ;;;base case 
-        (append acc char-list)
-      ;;;tokenize brackets
-      (cond ((member head-list brackets) 
-             (tokenize-char-list tail-list 
-                        (append acc 
-                                (tokenize-brackets
-                                 head-list))))
-            ;;;TOKENIZE COMMA
-            ((eql head-list #\:) 
-             (tokenize-char-list tail-list 
-                        (append acc 
-                                token-column )))
-            ;;TOKENIZE COMMA
-            ((eql head-list #\,) 
-             (tokenize-char-list tail-list 
-                        (append acc 
-                                token-comma)))
-            ;;;TOKENIZE STRING
-            ((eql head-list #\") 
-             (let ((parsed-string-data 
-                    (parse-string-token tail-list)))
-          (tokenize-char-list (cadr
-                      parsed-string-data)             
-          (append acc 
-                  (list 
-                   (tokenize-string (car parsed-string-data)))))
-          )
-             )
-
-          ;;;TOKENIZE-NUMBER
-          ((member head-list 
-                   full-number-symbols) 
-           (let ((parsed-number-data
-                  (if (eql head-list #\-) 
-                      (parse-number-token tail-list 
-                                    (list #\-)) 
-                    (parse-number-token char-list))))
-             (tokenize-char-list 
-              (cadr parsed-number-data) 
-              (append acc 
-                      (list 
-                       (tokenize-number 
-                        (string-to-number (car parsed-number-data)))))
-              )))
-          ((member head-list 
-                   spaces) 
-           (tokenize-char-list tail-list
-                      (append acc
-                              token-white-space)))     
-          (T (error "MALFORMED JSON"))))))
-
-
-(defun tokenize-brackets (char) 
-  (cond ((eql char #\{) 
-         (list "OPENCURLY"))
-        ((eql char #\}) 
-         (list "CLOSEDCURLY"))
-        ((eql char #\[) 
-         (list "OPENBRACKET"))
-        ((eql char #\]) 
-         (list "CLOSEDBRACKET"))
- ))
-
-(defun tokenize-string (string-to-tokenize) 
-  (list "string-token"
-        string-to-tokenize))
-(defun tokenize-number (number-to-tokenize) 
-  (list "number-token"
-        number-to-tokenize))
-
-
-;;; END TOKENIZER
-
-;;;BEGIN INPUT OUTPUT
 (defun jsondump (lisp-json file-name) 
   ;;; TARGET-VARIABLE IS WHERE THE DATA IS WRITTEN IN AND SET ON FILE NAME
   (with-open-file (target-variable file-name 
@@ -444,6 +268,7 @@
           (prin1-to-string value))
         ((stringp value) 
           (stringify-lisp-value value))
+        ;;CASE IN WHICH IS NOT A NUMBER NOT A STRING IS A COMPOUND VALUE EITHER JSONOBJ OR JSONARRAY
         (T (lisp-json-to-json value))
           ))
 
@@ -461,23 +286,203 @@
   (with-open-file (input-stream filename 
                                 :if-does-not-exist :error
                                 :direction :input) 
-    ;;;TODO LUCA METTERE METODO 
-    ;;; PL               
-    (jsonparse (stream-to-string input-stream))
+                                  
+    (stream-to-string input-stream)
     ))
 
 
 
 ;;; GIVEN A STREAM RETURNS A STRING
 (defun stream-to-string (inputstream)
-  (let ((json (read-char inputstream
-                         nil 'eof)))
-    (if (eq json 'eof) ""
-      (string-append json 
-                     (stream-to-string inputstream)))))
-;;; END OF INPUT OUTPUT
+  (let ((json (read-char inputstream 
+                         nil 
+                         'eof)))
 
-;;; BEGIN JSON-ACCESS
+    (unless (eql json 'eof)
+      (string-append json 
+                     (load-char inputstream)))
+      ))
+
+;;;;;;;;;;;;;
+;;; tokenizer
+;;;;;;;;;;;;
+
+(defparameter curly-brackets '(#\{ #\}))
+(defparameter squared-brackets '(#\[ #\]))
+(defparameter brackets (append curly-brackets squared-brackets))
+(defparameter spaces '(#\Space #\Newline #\Tab))
+(defparameter apix '(#\" #\'))
+(defparameter token-column (list "COLON"))
+(defparameter token-comma (list "COMMA"))
+(defparameter token-white-space (list "WHITESPACE"))
+(defparameter digits '(#\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
+
+(defparameter symbols '(#\-))
+(defparameter full-number-symbols (append digits symbols))
+
+
+;;;TODO AGGIUNGERE IL CASO DI TRUE E FALSE
+(defun tokenize (string)
+  (remove-white-spaces-token 
+   (tokenize-char-list 
+    (string-to-list string))) 
+)
+ 
+;;;; Given a string returns an array of characters
+(defun string-to-list (json-string)
+    (coerce 
+     json-string 
+     'list))
+
+(defun char-list-to-string (char-list) 
+  (coerce char-list 'string))
+
+
+
+(defun string-to-number (string)
+   (if (null (find #\. string))
+      (parse-integer string)
+
+     (cond ((null 
+             (float-integrity string)) 
+             (error "MALFORMED FLOAT"))     
+           (T (parse-float string)))))     
+
+(defun float-integrity (string-number) 
+(eql (count #\. string-number) 1))
+
+
+
+(defun remove-white-spaces-token (char-list) 
+  (remove-if
+   (lambda (char)
+     (member char token-white-space))
+   char-list))
+
+
+;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
+
+;; Lo chiamo quando incontro il carattere \"
+;;; Caso base : \" <- Se ritrovo i doppi apici so che sono alla fine di una stringa
+(defun parse-string (char-list &optional acc) 
+  (let ((curr-char (first char-list))
+        (list-rest (rest char-list)))
+    (if (eql curr-char #\") 
+        (list 
+         (char-list-to-string 
+          (append acc  nil)) 
+         list-rest)
+      (parse-string list-rest 
+                    (append acc
+                            (list curr-char)))
+      )
+))
+
+
+;;; Dato una lista di caratteri in input restituisce una numero in forma stringa
+(defun parse-number (char-list &optional acc ) 
+  (let ((curr-char 
+         (first char-list))
+        (rest-list 
+         (rest char-list)))
+
+    (if (or (member curr-char digits) 
+      (eql curr-char #\.)) 
+        (parse-number rest-list 
+          (append acc (list curr-char))) 
+          (list (char-list-to-string 
+            (append acc nil)) 
+               char-list)) 
+    ))
+
+
+
+
+
+;;;(#\" #\Space #\Space #\Space #\n #\o #\m #\e #\" #\: #\" #\A #\r #\t #\h #\u #\r #\" )
+
+(defun tokenize-char-list (char-list &optional acc) 
+  (let ((head-list 
+         (first char-list)) 
+        (tail-list 
+         (rest char-list)))
+ 
+    (if (null char-list)
+        ;;;base case 
+        (append acc char-list)
+      ;;;tokenize brackets
+      (cond ((member head-list brackets) 
+             (tokenize-char-list tail-list 
+                        (append acc 
+                                (tokenize-brackets
+                                 head-list))))
+            ;;;TOKENIZE COMMA
+            ((eql head-list #\:) 
+             (tokenize-char-list tail-list 
+                        (append acc 
+                                token-column )))
+            ;;TOKENIZE COMMA
+            ((eql head-list #\,) 
+             (tokenize-char-list tail-list 
+                        (append acc 
+                                token-comma)))
+            ;;;TOKENIZE STRING
+            ((eql head-list #\") 
+             (let ((parsed-string-data 
+                    (parse-string tail-list)))
+          (tokenize-char-list (cadr
+                      parsed-string-data)             
+          (append acc 
+                  (list 
+                   (tokenize-string (car parsed-string-data)))))
+          )
+             )
+
+          ;;;TOKENIZE-NUMBER
+          ((member head-list 
+                   full-number-symbols) 
+           (let ((parsed-number-data
+                  (if (eql head-list #\-) 
+                      (parse-number tail-list 
+                                    (list #\-)) 
+                    (parse-number char-list))))
+             (tokenize-char-list 
+              (cadr parsed-number-data) 
+              (append acc 
+                      (list 
+                       (tokenize-number 
+                        (string-to-number (car parsed-number-data)))))
+              )))
+          ((member head-list 
+                   spaces) 
+           (tokenize-char-list tail-list
+                      (append acc
+                              token-white-space)))     
+          (T (error "MALFORMED JSON"))))))
+
+
+(defun tokenize-brackets (char) 
+  (cond ((eql char #\{) 
+         (list "OPENCURLY"))
+        ((eql char #\}) 
+         (list "CLOSEDCURLY"))
+        ((eql char #\[) 
+         (list "OPENBRACKET"))
+        ((eql char #\]) 
+         (list "CLOSEDBRACKET"))
+ ))
+
+(defun tokenize-string (string-to-tokenize) 
+  (list "string-token"
+        string-to-tokenize))
+(defun tokenize-number (number-to-tokenize) 
+  (list "number-token"
+        number-to-tokenize))
+
+ 
+;;;; json access
+
+
 (defun jsonaccess (obj &rest key)
   (jsonaccess_ obj key)
   )
@@ -498,7 +503,6 @@
                       "not a JSON object or array or not appropriate key"
                       obj cur-key)))))
       (jsonaccess_ current (rest fields))))) 
-;;; END OF JSON-ACCESS
 
 
-;;; end-of-file jsonparsing.lisp
+
