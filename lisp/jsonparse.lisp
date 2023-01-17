@@ -8,6 +8,11 @@
 ;;     PARSER
 ;;
 
+;; string -> tokens -> object
+(defun jsonparse (X)
+  jsonparse-tokens (tokenize(X)))
+
+;; tokens -> object
 (defun jsonparse-tokens (tokens)
   (let
       ((result (parse-json tokens)))
